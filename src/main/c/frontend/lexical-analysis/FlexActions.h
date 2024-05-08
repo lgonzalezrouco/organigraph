@@ -25,9 +25,31 @@ void BeginMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerC
 void EndMultilineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 void IgnoredLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
-Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+void BeginOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+void EndOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
+Token EmployeeLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token BracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ProjectLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token InLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token UnderLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token SearchLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token AssignmentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token QuotationMarkLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token FromLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ReplaceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token WithLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
+Token MetadataLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token IdentifierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
+Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token UnknownLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 

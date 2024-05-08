@@ -54,23 +54,136 @@ void IgnoredLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
 	}
 }
 
-Token ArithmeticOperatorLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+void BeginOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	if (_logIgnoredLexemes) {
+		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	}
+}
+
+void EndOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	if (_logIgnoredLexemes) {
+		_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	}
+}
+
+Token EmployeeLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = EMPLOYEE;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token BracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	Token token;
 	switch (lexicalAnalyzerContext->lexeme[0]) {
-		case '-': token = SUB; break;
-		case '*': token = MUL; break;
-		case '/': token = DIV; break;
-		case '+': token = ADD; break;
+		case '{': token = OPEN_BRACKET; break;
+		case '}': token = CLOSE_BRACKET; break;
 	}
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
 
-Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+Token ProjectLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	lexicalAnalyzerContext->semanticValue->integer = atoi(lexicalAnalyzerContext->lexeme);
-	return INTEGER;
+	Token token = PROJECT;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token InLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = IN;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token UnderLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = UNDER;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token SearchLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = SEARCH;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token AssignmentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = ASSIGN;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token QuotationMarkLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = QUOTE;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = REMOVE;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token FromLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = FROM;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token;
+	switch (lexicalAnalyzerContext->lexeme[0]) {
+		case '[': token = OPEN_SQUARE_BRACKET; break;
+		case ']': token = CLOSE_SQUARE_BRACKET; break;
+	}
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = COMMA;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = CHILD;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = SIBLING;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token ReplaceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = REPLACE;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token WithLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = WITH;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
 }
 
 Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
@@ -82,6 +195,27 @@ Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
 	}
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
+}
+
+Token MetadataLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = METADATA;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+Token IdentifierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = ID;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
+
+Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	lexicalAnalyzerContext->semanticValue->integer = atoi(lexicalAnalyzerContext->lexeme);
+	return INTEGER;
 }
 
 Token UnknownLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {

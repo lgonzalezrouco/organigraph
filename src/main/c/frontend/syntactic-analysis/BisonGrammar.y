@@ -20,6 +20,7 @@
 	Attributes * attributes;
 	Factor * factor;
 	Program * program;
+	search_specification * search_specification;
 }
 
 /**
@@ -57,6 +58,7 @@
 %token <token> CLOSE_SQUARE_BRACKET
 %token <token> COMMA
 %token <token> CHILD
+%token <token> CHILDANDSELF
 %token <token> SIBLING
 %token <token> REPLACE
 %token <token> WITH
@@ -75,6 +77,7 @@
 %type <attributes> attributes
 %type <factor> factor
 %type <program> program
+%type <search_specification> search_specification
 
 /**
  * Precedence and associativity.
@@ -95,12 +98,13 @@ expression: expression[left] ADD expression[right]					{ $$ = ArithmeticExpressi
 	| expression[left] SUB expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, SUBTRACTION); }
 	| factor														{ $$ = FactorExpressionSemanticAction($1); }
 	| PROJECT ID
-	| employee ID project bosses properties
+	| employee ID project hierachy properties
 	| REMOVE ID FROM ID	
 	| REPLACE ID FROM ID WITH ID
-	| EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET ASSIGN SEARCH properties IN ID	
-	| EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET ASSIGN SEARCH properties IN ID	
-	;
+	| employees ASSIGN list	
+	| list relationship project hierachy
+	| 
+		;
 
 attributes: attributes attributes
 	| METADATA QUOTE ID QUOTE
@@ -111,10 +115,11 @@ properties: OPEN_BRACKET attributes CLOSE_BRACKET
 	|
 	;
 
-bosses: UNDER bosses bosses
-	| ID
-	|
+hierachy: UNDER list
+	| 
 	;
+
+
 
 project: IN ID
 	|
@@ -123,12 +128,25 @@ project: IN ID
 employee: EMPLOYEE
 	|
 	;
+employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET
+	| ID
+	;
+list: OPEN_PARENTHESIS SEARCH properties IN ID CLOSE_PARENTHESIS
+	| ID
+	| OPEN_BRACKET elements CLOSE_BRACKET
+	;
 
+elements: elements elements
+	| ID
+	| 
+	;
 factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS				{ $$ = ExpressionFactorSemanticAction($2); }
 	| constant														{ $$ = ConstantFactorSemanticAction($1); }
 	;
-
+relationship: CHILD
+	| SIBLING
+	| CHILDANDSELF
+	;
 constant: INTEGER													{ $$ = IntegerConstantSemanticAction($1); }
 	;
-
 %%

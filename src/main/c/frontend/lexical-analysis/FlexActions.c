@@ -165,6 +165,14 @@ Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	return token;
 }
 
+
+Token ChildAndSelfLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = CHILDANDSELF;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}
+
 Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	Token token = SIBLING;

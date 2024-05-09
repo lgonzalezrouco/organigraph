@@ -54,6 +54,7 @@
 ","                                 { return CommaLexemeAction(createLexicalAnalyzerContext()); }
 "-> *"                              { return ChildLexemeAction(createLexicalAnalyzerContext()); }
 "== *"                              { return SiblingsLexemeAction(createLexicalAnalyzerContext()); }
+"=> *"                              { return ChildAndSelfLexemeAction(createLexicalAnalyzerContext()); }
 "replace"                           { return ReplaceLexemeAction(createLexicalAnalyzerContext()); }
 "with"                              { return WithLexemeAction(createLexicalAnalyzerContext()); }
 "("									{ return ParenthesisLexemeAction(createLexicalAnalyzerContext()); }

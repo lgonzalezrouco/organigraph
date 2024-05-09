@@ -10,12 +10,14 @@
 	/** Terminals. */
 
 	int integer;
+	char* string;
 	Token token;
 
 	/** Non-terminals. */
 
 	Constant * constant;
 	Expression * expression;
+	Attributes * attributes;
 	Factor * factor;
 	Program * program;
 }
@@ -35,19 +37,42 @@
 */
 
 /** Terminals. */
-%token <integer> INTEGER
 %token <token> ADD
-%token <token> CLOSE_PARENTHESIS
 %token <token> DIV
 %token <token> MUL
-%token <token> OPEN_PARENTHESIS
 %token <token> SUB
+
+%token <token> EMPLOYEE
+%token <token> OPEN_BRACKET
+%token <token> CLOSE_BRACKET
+%token <token> PROJECT
+%token <token> IN
+%token <token> UNDER
+%token <token> SEARCH
+%token <token> ASSIGN
+%token <token> QUOTE
+%token <token> REMOVE
+%token <token> FROM
+%token <token> OPEN_SQUARE_BRACKET
+%token <token> CLOSE_SQUARE_BRACKET
+%token <token> COMMA
+%token <token> CHILD
+%token <token> SIBLING
+%token <token> REPLACE
+%token <token> WITH
+%token <token> OPEN_PARENTHESIS
+%token <token> CLOSE_PARENTHESIS
+%token <token> METADATA
+%token <string> ID
+
+%token <integer> INTEGER
 
 %token <token> UNKNOWN
 
 /** Non-terminals. */
 %type <constant> constant
 %type <expression> expression
+%type <attributes> attributes
 %type <factor> factor
 %type <program> program
 
@@ -69,6 +94,34 @@ expression: expression[left] ADD expression[right]					{ $$ = ArithmeticExpressi
 	| expression[left] MUL expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, MULTIPLICATION); }
 	| expression[left] SUB expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, SUBTRACTION); }
 	| factor														{ $$ = FactorExpressionSemanticAction($1); }
+	| PROJECT ID
+	| employee ID project bosses properties
+	| REMOVE ID FROM ID	
+	| REPLACE ID FROM ID WITH ID
+	| EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET ASSIGN SEARCH properties IN ID	
+	| EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET ASSIGN SEARCH properties IN ID	
+	;
+
+attributes: attributes attributes
+	| METADATA QUOTE ID QUOTE
+	| METADATA INTEGER
+	;
+
+properties: OPEN_BRACKET attributes CLOSE_BRACKET
+	|
+	;
+
+bosses: UNDER bosses bosses
+	| ID
+	|
+	;
+
+project: IN ID
+	|
+	;
+
+employee: EMPLOYEE
+	|
 	;
 
 factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS				{ $$ = ExpressionFactorSemanticAction($2); }

@@ -119,13 +119,6 @@ Token AssignmentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	return token;
 }
 
-Token QuotationMarkLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	Token token = QUOTE;
-	lexicalAnalyzerContext->semanticValue->token = token;
-	return token;
-}
-
 Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
 	Token token = REMOVE;
@@ -147,13 +140,6 @@ Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext)
 		case '[': token = OPEN_SQUARE_BRACKET; break;
 		case ']': token = CLOSE_SQUARE_BRACKET; break;
 	}
-	lexicalAnalyzerContext->semanticValue->token = token;
-	return token;
-}
-
-Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
-	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-	Token token = COMMA;
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
@@ -218,6 +204,13 @@ Token IdentifierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
 	lexicalAnalyzerContext->semanticValue->token = token;
 	return token;
 }
+
+Token StringLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext){
+	_logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+	Token token = STRING;
+	lexicalAnalyzerContext->semanticValue->token = token;
+	return token;
+}	
 
 
 Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext) {

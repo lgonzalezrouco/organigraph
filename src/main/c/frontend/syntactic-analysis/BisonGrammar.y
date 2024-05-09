@@ -15,12 +15,21 @@
 
 	/** Non-terminals. */
 
-	Constant * constant;
+	/* Constant * constant; */
 	Expression * expression;
 	Attributes * attributes;
-	Factor * factor;
+	/* Factor * factor; */
 	Program * program;
-	search_specification * search_specification;
+	Employee * employee;
+	Employees * employees;
+	List * list;
+	Elements * elements;
+	Relationship * relationship;
+	Properties * properties;
+	Hierachy * hierachy;
+	Project * project;
+	Define * define;
+	
 }
 
 /**
@@ -38,10 +47,10 @@
 */
 
 /** Terminals. */
-%token <token> ADD
+/* %token <token> ADD
 %token <token> DIV
 %token <token> MUL
-%token <token> SUB
+%token <token> SUB */
 
 %token <token> EMPLOYEE
 %token <token> OPEN_BRACKET
@@ -51,12 +60,11 @@
 %token <token> UNDER
 %token <token> SEARCH
 %token <token> ASSIGN
-%token <token> QUOTE
+%token <string> STRING
 %token <token> REMOVE
 %token <token> FROM
 %token <token> OPEN_SQUARE_BRACKET
 %token <token> CLOSE_SQUARE_BRACKET
-%token <token> COMMA
 %token <token> CHILD
 %token <token> CHILDANDSELF
 %token <token> SIBLING
@@ -72,81 +80,95 @@
 %token <token> UNKNOWN
 
 /** Non-terminals. */
-%type <constant> constant
+/* %type <constant> constant */
+/* %type <factor> factor */
 %type <expression> expression
 %type <attributes> attributes
-%type <factor> factor
 %type <program> program
-%type <search_specification> search_specification
+%type <employee> employee
+%type <employees> employees
+%type <list> list
+%type <elements> elements
+%type <relationship> relationship
+%type <properties> properties
+%type <hierachy> hierachy 
+%type <project> project
+%type <define> define
 
 /**
  * Precedence and associativity.
  *
  * @see https://www.gnu.org/software/bison/manual/html_node/Precedence.html
  */
-%left ADD SUB
-%left MUL DIV
+/* %left ADD SUB
+%left MUL DIV */
 
 %%
 
 program: expression													{ $$ = ExpressionProgramSemanticAction(currentCompilerState(), $1); }
 	;
 
-expression: expression[left] ADD expression[right]					{ $$ = ArithmeticExpressionSemanticAction($left, $right, ADDITION); }
+expression: PROJECT ID												{ $$ = ProjectExpressionSemanticAction($2); }
+	| employee ID project hierachy properties						{ $$ = EmployeeExpressionSemanticAction($2, $3, $4, $5); }
+	| REMOVE ID FROM ID												{ $$ = RemoveExpressionSemanticAction($2, $4); }
+	| REPLACE ID FROM ID WITH define								{ $$ = ReplaceExpressionSemanticAction($2, $4, $6); }
+	| employees ASSIGN list											{ $$ = EmployeesAssignExpressionSemanticAction($1, $3); }
+	| list relationship project hierachy							{ $$ = ListRelationshipProjectHierachyExpressionSemanticAction($1, $2, $3, $4); }
+	;
+/* 	| expression[left] ADD expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, ADDITION); }
 	| expression[left] DIV expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, DIVISION); }
 	| expression[left] MUL expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, MULTIPLICATION); }
 	| expression[left] SUB expression[right]						{ $$ = ArithmeticExpressionSemanticAction($left, $right, SUBTRACTION); }
-	| factor														{ $$ = FactorExpressionSemanticAction($1); }
-	| PROJECT ID
-	| employee ID project hierachy properties
-	| REMOVE ID FROM ID	
-	| REPLACE ID FROM ID WITH ID
-	| employees ASSIGN list	
-	| list relationship project hierachy
-	| 
-		;
+	| factor														{ $$ = FactorExpressionSemanticAction($1); } */
 
-attributes: attributes attributes
-	| METADATA QUOTE ID QUOTE
-	| METADATA INTEGER
+attributes: attributes attributes									{ $$ = AttributesSemanticAction($1, $2); }
+	| METADATA STRING												{ $$ = MetadataSemanticAction($1, $2); }
+	| METADATA INTEGER												{ $$ = MetadataSemanticAction($1, $2); }
 	;
 
-properties: OPEN_BRACKET attributes CLOSE_BRACKET
-	|
+properties: OPEN_BRACKET attributes CLOSE_BRACKET					{ $$ = PropertiesSemanticAction($2); }
+	|																{ $$ = PropertiesSemanticAction(NULL); }
 	;
 
-hierachy: UNDER list
-	| 
+hierachy: UNDER list												{ $$ = HierachySemanticAction($2); }
+	| 																{ $$ = HierachySemanticAction(NULL); }
 	;
 
-
-
-project: IN ID
-	|
+project: IN ID														{ $$ = ProjectSemanticAction($2); }
+	|																{ $$ = ProjectSemanticAction(NULL); }
 	;
 
-employee: EMPLOYEE
-	|
-	;
-employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET
-	| ID
-	;
-list: OPEN_PARENTHESIS SEARCH properties IN ID CLOSE_PARENTHESIS
-	| ID
-	| OPEN_BRACKET elements CLOSE_BRACKET
+define: ID															{ $$ = DefineSemanticAction($1); }
+	| properties													{ $$ = DefineSemanticAction($1); }
 	;
 
-elements: elements elements
-	| ID
-	| 
+employee: EMPLOYEE													{ $$ = EmployeeSemanticAction(); }
+	|																{ $$ = EmployeeSemanticAction(); }				
 	;
-factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS				{ $$ = ExpressionFactorSemanticAction($2); }
+
+employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET		{ $$ = EmployeesSemanticAction($2); }
+	| ID															{ $$ = EmployeesSemanticAction($1); }
+	;
+
+list: OPEN_PARENTHESIS SEARCH properties IN ID CLOSE_PARENTHESIS	{ $$ = ListSemanticAction($3, $5); }
+	| ID															{ $$ = ListSemanticAction(NULL, $1); }
+	| OPEN_BRACKET elements CLOSE_BRACKET							{ $$ = ListSemanticAction($2, NULL); }
+	;
+
+elements: elements elements											{ $$ = ElementsSemanticAction($1, $2); }
+	| ID															{ $$ = ElementsSemanticAction(NULL, $1); }
+	| 																{ $$ = ElementsSemanticAction(NULL, NULL); }
+	;
+
+relationship: CHILD													{ $$ = ChildSemanticAction(); }
+	| SIBLING														{ $$ = SiblingSemanticAction(); }
+	| CHILDANDSELF													{ $$ = ChildAndSelfSemanticAction(); }
+	;
+
+/* factor: OPEN_PARENTHESIS expression CLOSE_PARENTHESIS			{ $$ = ExpressionFactorSemanticAction($2); }
 	| constant														{ $$ = ConstantFactorSemanticAction($1); }
 	;
-relationship: CHILD
-	| SIBLING
-	| CHILDANDSELF
-	;
+
 constant: INTEGER													{ $$ = IntegerConstantSemanticAction($1); }
-	;
+	; */
 %%

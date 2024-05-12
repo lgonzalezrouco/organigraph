@@ -1,0 +1,9 @@
+project mercadoLibre;
+
+employee empleado1 in mercadoLibre;
+
+employee empleado5 in mercadoLibre;
+
+employee empleado2 in mercadoLibre under empleado5;
+
+empleados5 -> in mercadoLibre under empleado1;

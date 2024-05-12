@@ -28,6 +28,9 @@ typedef struct RemoveExpression RemoveExpression;
 typedef struct ReplaceExpression ReplaceExpression;
 typedef struct AssignExpression AssignExpression;
 typedef struct RelationshipExpression RelationshipExpression;
+typedef struct ListRelationshipExpression ListRelationshipExpression;
+typedef struct ListExpression ListExpression;
+typedef struct Expressions Expressions;
 typedef struct Expression Expression;
 typedef struct Program Program;
 typedef struct Attribute Attribute;
@@ -59,7 +62,9 @@ enum ExpressionType {
     REMOVE_EXPRESSION,
     REPLACE_EXPRESSION,
     ASSIGN_EXPRESSION,
-    RELATIONSHIP_EXPRESSION
+    RELATIONSHIP_EXPRESSION,
+    LIST_RELATIONSHIP_EXPRESSION,
+    LIST_EXPRESSION
 };
 
 struct ProjectExpression {
@@ -101,6 +106,15 @@ struct RelationshipExpression {
     Hierarchy* hierarchy;
 };
 
+struct ListRelationshipExpression {
+    List* list;
+    Relationship* relationship;
+};
+
+struct ListExpression {
+    List* list;
+};
+
 struct Expression {
     ExpressionType type;
     union {
@@ -111,11 +125,18 @@ struct Expression {
         ReplaceExpression* replaceExpression;
         AssignExpression* assignExpression;
         RelationshipExpression* relationshipExpression;
+        ListRelationshipExpression* listRelationshipExpression;
+        ListExpression* listExpression;
     };
 };
 
 struct Program {
-    Expression* expression;
+    Expressions* expressions;
+};
+
+struct Expressions {
+    Expression** expressions;
+    int count;
 };
 
 struct Attribute {
@@ -184,7 +205,10 @@ void releaseRemoveExpression(RemoveExpression* removeExpression);
 void releaseReplaceExpression(ReplaceExpression* replaceExpression);
 void releaseAssignExpression(AssignExpression* assignExpression);
 void releaseRelationshipExpression(RelationshipExpression* relationshipExpression);
+void releaseListRelationshipExpression(ListRelationshipExpression* listRelationshipExpression);
+void releaseListExpression(ListExpression* listExpression);
 void releaseExpression(Expression* expression);
+void releaseExpressions(Expressions* expressions);
 void releaseProgram(Program* program);
 void releaseAttribute(Attribute* attribute);
 void releaseAttributes(Attributes* attributes);

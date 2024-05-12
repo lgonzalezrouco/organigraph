@@ -1,0 +1,25 @@
+project mercadoLibre;
+employee empleado1 in mercadoLibre {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee empleado2 in mercadoLibre under empleado1 {
+    name: "Martin Gonzalez",
+    role: "junior developer",
+    age: 25
+};
+employee empleado3 in mercadoLibre under empleado1 {
+    name: "Martin Gonzalez",
+    role: "junior developer",
+    age: 25
+};
+employee empleado4 in mercadoLibre under empleado1 {
+    name: "Martin Gonzalez",
+    role: "junior developer",
+    age: 25
+};
+employee empleado5 in mercadoLibre under empleado1 {
+    name: "Martin Gonzalez",
+    role: "junior developer",
+    age: 25
+};

@@ -1,4 +1,0 @@
-employee empleado2 in mercadoLibre under empleado1 {
-    name: "Martin Gonzalez",
-    role: "junior developer"
-}

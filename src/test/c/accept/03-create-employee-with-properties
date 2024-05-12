@@ -2,4 +2,4 @@ employee empleado {
     name: "Tomas Rodriguez",
     role: "Junior Developer",
     age: 25    
-}
+};

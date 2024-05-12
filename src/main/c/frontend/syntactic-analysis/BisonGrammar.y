@@ -37,6 +37,7 @@
  * @see https://www.gnu.org/software/bison/manual/html_node/Destructor-Decl.html
  */
 /*
+%destructor { releaseExpressions($$); } <expressions>
 %destructor { releaseExpression($$); } <expression>
 %destructor { releaseProgram($$); } <program>
 %destructor { releaseEmployees($$); } <employees>
@@ -104,10 +105,10 @@
 
 %%
 
-program: expressions												{ $$ = ExpressionProgramSemanticAction(currentCompilerState(), $1); }
+program: expressions												{ $$ = ExpressionsProgramSemanticAction(currentCompilerState(), $1); }
 	;
-expressions: expression SEMICOLON expressions						{ $$ = }
-	|expression SEMICOLON
+expressions: expressions expression SEMICOLON						{ $$ = AppendExpressionSemanticAction($1, $2); }
+	| expression SEMICOLON											{ $$ = ExpressionSemanticAction($1); }
 	;
 
 expression: PROJECT ID												{ $$ = ProjectExpressionSemanticAction($2); }
@@ -118,6 +119,8 @@ expression: PROJECT ID												{ $$ = ProjectExpressionSemanticAction($2); }
 	| REPLACE ID FROM ID WITH define								{ $$ = ReplaceExpressionSemanticAction($2, $4, $6); }
 	| employees ASSIGN list											{ $$ = AssignExpressionSemanticAction($1, $3); }
 	| list relationship IN ID hierarchy								{ $$ = RelationshipExpressionSemanticAction($1, $2, $4, $5); }
+	| list relationship												{ $$ = ListRelationshipExpressionSemanticAction($1, $2); }
+	| list															{ $$ = ListExpressionSemanticAction($1); }
 	;
 
 attributes: attributes COMMA attribute								{ $$ = AppendAttributesSemanticAction($1, $3); }

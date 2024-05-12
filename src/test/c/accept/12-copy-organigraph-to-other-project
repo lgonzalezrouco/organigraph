@@ -4,4 +4,6 @@ employee empleado in mercadoLibre;
 
 employee empleado2 in mercadoLibre under empleado;
 
-remove empleado from mercadoLibre;
+project globant;
+
+empleado -> in globant;

@@ -81,6 +81,23 @@ void releaseRelationshipExpression(RelationshipExpression* relationshipExpressio
     }
 }
 
+void releaseListRelationshipExpression(ListRelationshipExpression* listRelationshipExpression) {
+    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+    if (listRelationshipExpression != NULL) {
+        releaseList(listRelationshipExpression->list);
+        releaseRelationship(listRelationshipExpression->relationship);
+        free(listRelationshipExpression);
+    }
+}
+
+void releaseListExpression(ListExpression* listExpression) {
+    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+    if (listExpression != NULL) {
+        releaseList(listExpression->list);
+        free(listExpression);
+    }
+}
+
 void releaseExpression(Expression* expression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (expression != NULL) {
@@ -106,6 +123,9 @@ void releaseExpression(Expression* expression) {
             case RELATIONSHIP_EXPRESSION:
                 releaseRelationshipExpression(expression->relationshipExpression);
                 break;
+            case LIST_EXPRESSION:
+                releaseListExpression(expression->listExpression);
+                break;
         }
         free(expression);
     }
@@ -114,8 +134,17 @@ void releaseExpression(Expression* expression) {
 void releaseProgram(Program* program) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (program != NULL) {
-        releaseExpression(program->expression);
+        releaseExpressions(program->expressions);
         free(program);
+    }
+}
+
+void releaseExpressions(Expressions* expressions) {
+    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
+    if (expressions != NULL) {
+        for (int i = 0; i < expressions->count; i++) releaseExpression(expressions->expressions[i]);
+        free(expressions->expressions);
+        free(expressions);
     }
 }
 

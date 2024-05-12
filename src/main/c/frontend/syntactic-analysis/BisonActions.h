@@ -19,7 +19,9 @@ void shutdownBisonActionsModule();
  * Bison semantic actions.
  */
 
-Program* ExpressionProgramSemanticAction(CompilerState* compilerState, Expression* expression);
+Program* ExpressionsProgramSemanticAction(CompilerState* compilerState, Expressions* expressions);
+Expressions* AppendExpressionSemanticAction(Expressions* expressions, Expression* expression);
+Expressions* ExpressionSemanticAction(Expression* expression);
 Expression* ProjectExpressionSemanticAction(char* projectId);
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties);
 Expression* EmployeeExpressionSemanticAction(char* employeeId, char* projectId, Hierarchy* hierarchy,
@@ -29,6 +31,8 @@ Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* projectId, 
 Expression* AssignExpressionSemanticAction(Employees* employees, List* list);
 Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, char* projectId,
                                                  Hierarchy* hierarchy);
+Expression* ListRelationshipExpressionSemanticAction(List* list, Relationship* relationship);
+Expression* ListExpressionSemanticAction(List* list);
 Attributes* AppendAttributesSemanticAction(Attributes* attributes, Attribute* attribute);
 Attributes* AttributeSemanticAction(Attribute* attribute);
 Attribute* StringMetadataSemanticAction(char* metadataId, char* value);

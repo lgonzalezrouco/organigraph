@@ -18,6 +18,8 @@
 
 %x ONELINE_COMMENT
 
+%x STRING
+
 /**
  * Reusable patterns.
  *
@@ -57,19 +59,19 @@
 "with"                                      { return WithLexemeAction(createLexicalAnalyzerContext()); }
 "("									        { return ParenthesisLexemeAction(createLexicalAnalyzerContext()); }
 ")"									        { return ParenthesisLexemeAction(createLexicalAnalyzerContext()); }
+":"                                         { return ColonLexemeAction(createLexicalAnalyzerContext()); }
+","                                         { return CommaLexemeAction(createLexicalAnalyzerContext()); }
 
-[[:alpha:]]+":"                             { return MetadataLexemeAction(createLexicalAnalyzerContext()); }
-[[:alphnum]|[:digits:]]+                    { return IdentifierLexemeAction(createLexicalAnalyzerContext()); }
-"\""[[:alpha:][:space:][:digits:]]+"\""		{ return StringLexemeAction(createLexicalAnalyzerContext()); }
+"\""[[:alnum:][:space:][:punct:]]+"\""      { return StringLexemeAction(createLexicalAnalyzerContext()); }
 
 [[:digit:]]+						        { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
+
+[[:alnum:]]+                                { return IdentifierLexemeAction(createLexicalAnalyzerContext()); }
+
 
 [[:space:]]+						        { IgnoredLexemeAction(createLexicalAnalyzerContext()); }
 
 .									        { return UnknownLexemeAction(createLexicalAnalyzerContext()); }
-
-
-/* "{"[[:space:]]*[[:alpha:]]+":"[[:space:]]*((("\""[[:alpha:][:space:][:digit:]]+"\"")|([:digit:]+))[[:space:]]*","[[:space:]]*)*[[:alpha:]]+":"[[:space:]]*(("\""[[:alpha:][:space:][:digit:]]+"\"")|([:digit:]+))[[:space:]]*"}" { return ObjectLexemeAction(createLexicalAnalyzerContext()); } */
 
 %%
 

@@ -1,12 +1,13 @@
 #ifndef BISON_ACTIONS_HEADER
 #define BISON_ACTIONS_HEADER
 
+#include <stdlib.h>
+
 #include "../../shared/CompilerState.h"
 #include "../../shared/Logger.h"
 #include "../../shared/Type.h"
 #include "AbstractSyntaxTree.h"
 #include "SyntacticAnalyzer.h"
-#include <stdlib.h>
 
 /** Initialize module's internal state. */
 void initializeBisonActionsModule();
@@ -18,33 +19,31 @@ void shutdownBisonActionsModule();
  * Bison semantic actions.
  */
 
-/* Constant * IntegerConstantSemanticAction(const int value);
-Expression * ArithmeticExpressionSemanticAction(Expression * leftExpression, Expression * rightExpression, ExpressionType type);
-Expression * FactorExpressionSemanticAction(Factor * factor);
-Factor * ConstantFactorSemanticAction(Constant * constant);
-Factor * ExpressionFactorSemanticAction(Expression * expression); */
-Program * ExpressionProgramSemanticAction(CompilerState * compilerState, Expression * expression);
-
-Expression* ProjectExpressionSemanticAction(ID * id);
-Expression* EmployeeExpressionSemanticAction(ID* id, Project* project, Hierachy* hierachy, Properties* properties);
-Expression* RemoveExpressionSemanticAction(ID* id1, ID* id2);
-Expression* ReplaceExpressionSemanticAction(ID* id1, ID* id2, Define* define);
-Expression* EmployeesAssignExpressionSemanticAction(Employees* employees, List* list);
-Expression* ListRelationshipProjectHierachyExpressionSemanticAction(List* list, Relationship* relationship, Project* project, Hierachy* hierachy);
-Attributes* AttributesSemanticAction(Attributes* attributes1, Attributes* attributes2);
-Attributes* MetadataSemanticAction(Metadata* metadata, STRING* string);
-Attributes* MetadataSemanticAction(Metadata* metadata, INTEGER* integer);
+Program* ExpressionProgramSemanticAction(CompilerState* compilerState, Expression* expression);
+Expression* ProjectExpressionSemanticAction(char* projectId);
+Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties);
+Expression* EmployeeExpressionSemanticAction(char* employeeId, char* projectId, Hierarchy* hierarchy,
+                                             Properties* properties);
+Expression* RemoveExpressionSemanticAction(char* idToRemove, char* projectId);
+Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* projectId, Define* define);
+Expression* AssignExpressionSemanticAction(Employees* employees, List* list);
+Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, char* projectId,
+                                                 Hierarchy* hierarchy);
+Attributes* AppendAttributesSemanticAction(Attributes* attributes, Attribute* attribute);
+Attributes* AttributeSemanticAction(Attribute* attribute);
+Attribute* StringMetadataSemanticAction(char* metadataId, char* value);
+Attribute* IntegerMetadataSemanticAction(char* metadataId, int value);
 Properties* PropertiesSemanticAction(Attributes* attributes);
-Hierachy* HierachySemanticAction(List* list);
-Project* ProjectSemanticAction(ID* id);
-Define* DefineSemanticAction(ID* id);
-Define* DefineSemanticAction(Properties* properties);
-Employee* EmployeeSemanticAction();
-Employees* EmployeesSemanticAction(ID* id);
-List* ListSemanticAction(Properties* properties, ID* id);
-List* ListSemanticAction(Elements* elements);
-Elements* ElementsSemanticAction(Elements* elements1, Elements* elements2);
-Elements* ElementsSemanticAction(ID* id);
+Hierarchy* HierarchySemanticAction(List* list);
+Define* VariableDefineSemanticAction(char* employeeId);
+Define* PropertiesDefineSemanticAction(Properties* properties);
+Employees* EmployeesSemanticAction(char* employeeId);
+Employees* VariableEmployeesSemanticAction(char* employeeId);
+List* ListSemanticAction(Properties* properties, char* projectId);
+List* VariableListSemanticAction(char* employeesId);
+List* ElementsListSemanticAction(Elements* elements);
+Elements* AppendElementsSemanticAction(Elements* elements, char* employeeId);
+Elements* ElementSemanticAction(char* employeesId);
 Relationship* ChildSemanticAction();
 Relationship* SiblingSemanticAction();
 Relationship* ChildAndSelfSemanticAction();

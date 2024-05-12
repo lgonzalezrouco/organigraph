@@ -42,11 +42,14 @@ Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext)
 Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ChildAndSelfLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ReplaceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token WithLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ColonLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
-Token MetadataLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token StringLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+
 Token IdentifierLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token IntegerLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);

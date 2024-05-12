@@ -1,1 +1,1 @@
-(search { name: "HOLA" } in MercadoLibre) -> in MercadoLibre under (search { role: "HOLA" } in MercadoLibre)
+(search { name: "HOLA" } in MercadoLibre) -> in MercadoLibre under {pedro,juan,marcos}

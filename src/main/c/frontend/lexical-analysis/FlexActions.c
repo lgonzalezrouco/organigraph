@@ -212,6 +212,13 @@ Token CommaLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     return token;
 }
 
+Token SemiColonLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
+    _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
+    Token token = SEMICOLON;
+    lexicalAnalyzerContext->semanticValue->token = token;
+    return token;
+}
+
 Token StringLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
     lexicalAnalyzerContext->semanticValue->string = lexicalAnalyzerContext->lexeme;

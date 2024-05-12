@@ -1,0 +1,27 @@
+project mercadoLibre;
+employee empleado1 in mercadoLibre  {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee empleado2 in Mercado Libre under empleado1 {
+    name: "María López",
+    role: "Senior Developer",
+    age: 30
+};
+employee empleado3 in Mercado Libre under empleado1 {
+    name: "Juan Pérez",
+    role: "Project Manager",
+    age: 35
+};
+employee empleado4 in Mercado Libre under empleado1 {
+    name: "Ana García",
+    role: "UX Designer",
+    age: 28
+};
+employee empleado5 in Mercado Libre {
+    name: "Carlos Martínez",
+    role: "Data Analyst",
+    age: 27
+};
+
+

@@ -40,6 +40,7 @@ Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token FromLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token SemiColonLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ChildAndSelfLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);

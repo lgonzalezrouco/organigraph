@@ -18,7 +18,6 @@
 
 %x ONELINE_COMMENT
 
-%x STRING
 
 /**
  * Reusable patterns.
@@ -61,6 +60,7 @@
 ")"									        { return ParenthesisLexemeAction(createLexicalAnalyzerContext()); }
 ":"                                         { return ColonLexemeAction(createLexicalAnalyzerContext()); }
 ","                                         { return CommaLexemeAction(createLexicalAnalyzerContext()); }
+";"                                         { return SemiColonLexemeAction(createLexicalAnalyzerContext());}
 
 "\""[[:alnum:][:space:][:punct:]]+"\""      { return StringLexemeAction(createLexicalAnalyzerContext()); }
 

@@ -14,7 +14,7 @@
 	Token token;
 
 	/** Non-terminals. */
-
+	Expressions * expressions;
 	Expression * expression;
 	Attributes * attributes;
 	Attribute * attribute;
@@ -72,6 +72,7 @@
 %token <token> CLOSE_PARENTHESIS
 %token <token> COLON
 %token <token> COMMA
+%token <token> SEMICOLON
 
 %token <string> ID
 
@@ -82,6 +83,7 @@
 %token <token> UNKNOWN
 
 /** Non-terminals. */
+%type <expressions> expressions
 %type <expression> expression
 %type <attributes> attributes
 %type <attribute> attribute
@@ -102,7 +104,10 @@
 
 %%
 
-program: expression													{ $$ = ExpressionProgramSemanticAction(currentCompilerState(), $1); }
+program: expressions												{ $$ = ExpressionProgramSemanticAction(currentCompilerState(), $1); }
+	;
+expressions: expression SEMICOLON expressions						{ $$ = }
+	|expression SEMICOLON
 	;
 
 expression: PROJECT ID												{ $$ = ProjectExpressionSemanticAction($2); }

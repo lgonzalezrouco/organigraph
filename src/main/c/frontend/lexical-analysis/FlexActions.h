@@ -29,7 +29,7 @@ void BeginOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerCon
 void EndOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token EmployeeLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token BracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token BracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token bracket);
 Token ProjectLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token InLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token UnderLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
@@ -38,7 +38,7 @@ Token AssignmentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token QuotationMarkLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token FromLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token squareBracket);
 Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SemiColonLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ChildLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
@@ -46,7 +46,7 @@ Token SiblingsLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ChildAndSelfLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token ReplaceLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token WithLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
+Token ParenthesisLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token parenthesis);
 Token ColonLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 
 Token StringLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);

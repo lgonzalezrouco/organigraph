@@ -69,19 +69,10 @@ Token EmployeeLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     return token;
 }
 
-Token BracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
+Token BracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext, Token bracket) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token;
-    switch (lexicalAnalyzerContext->lexeme[0]) {
-        case '{':
-            token = OPEN_BRACKET;
-            break;
-        case '}':
-            token = CLOSE_BRACKET;
-            break;
-    }
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
+    lexicalAnalyzerContext->semanticValue->token = bracket;
+    return bracket;
 }
 
 Token ProjectLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
@@ -133,19 +124,11 @@ Token FromLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     return token;
 }
 
-Token SquareBracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
+Token SquareBracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext, Token squareBracket) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token;
-    switch (lexicalAnalyzerContext->lexeme[0]) {
-        case '[':
-            token = OPEN_SQUARE_BRACKET;
-            break;
-        case ']':
-            token = CLOSE_SQUARE_BRACKET;
-            break;
-    }
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
+    
+    lexicalAnalyzerContext->semanticValue->token = squareBracket;
+    return squareBracket;
 }
 
 Token ChildLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
@@ -183,19 +166,11 @@ Token WithLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     return token;
 }
 
-Token ParenthesisLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
+Token ParenthesisLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext, Token parenthesis) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token;
-    switch (lexicalAnalyzerContext->lexeme[0]) {
-        case '(':
-            token = OPEN_PARENTHESIS;
-            break;
-        case ')':
-            token = CLOSE_PARENTHESIS;
-            break;
-    }
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
+
+    lexicalAnalyzerContext->semanticValue->token = parenthesis;
+    return parenthesis;
 }
 
 Token ColonLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {

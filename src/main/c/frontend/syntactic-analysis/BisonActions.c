@@ -38,6 +38,7 @@ Program* ExpressionsProgramSemanticAction(CompilerState* compilerState, Expressi
     } else {
         compilerState->succeed = true;
     }
+    return program;
 }
 
 Expressions* AppendExpressionSemanticAction(Expressions* expressions, Expression* expression) {

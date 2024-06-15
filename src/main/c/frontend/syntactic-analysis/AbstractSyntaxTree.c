@@ -4,7 +4,7 @@
 
 static Logger* _logger = NULL;
 
-void initializeAbstractSyntaxTreeModule() { _logger = createLogger("AbstractSyntxTree"); }
+void initializeAbstractSyntaxTreeModule() { _logger = createLogger("AbstractSyntaxTree"); }
 
 void shutdownAbstractSyntaxTreeModule() {
     if (_logger != NULL) {
@@ -17,7 +17,7 @@ void shutdownAbstractSyntaxTreeModule() {
 void releaseProjectExpression(ProjectExpression* projectExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (projectExpression != NULL) {
-        // free(projectExpression->projectId);
+        free(projectExpression->projectId);
         free(projectExpression);
     }
 }
@@ -25,7 +25,7 @@ void releaseProjectExpression(ProjectExpression* projectExpression) {
 void releaseVariableEmployeeExpression(VariableEmployeeExpression* variableEmployeeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (variableEmployeeExpression != NULL) {
-        // free(variableEmployeeExpression->employeeId);
+        free(variableEmployeeExpression->employeeId);
         releaseProperties(variableEmployeeExpression->properties);
         free(variableEmployeeExpression);
     }
@@ -34,8 +34,8 @@ void releaseVariableEmployeeExpression(VariableEmployeeExpression* variableEmplo
 void releaseEmployeeExpression(EmployeeExpression* employeeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (employeeExpression != NULL) {
-        // free(employeeExpression->employeeId);
-        // free(employeeExpression->projectId);
+        free(employeeExpression->employeeId);
+        free(employeeExpression->projectId);
         releaseHierarchy(employeeExpression->hierarchy);
         releaseProperties(employeeExpression->properties);
         free(employeeExpression);
@@ -45,8 +45,8 @@ void releaseEmployeeExpression(EmployeeExpression* employeeExpression) {
 void releaseRemoveExpression(RemoveExpression* removeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (removeExpression != NULL) {
-        // free(removeExpression->idToRemove);
-        // free(removeExpression->projectId);
+        free(removeExpression->idToRemove);
+        free(removeExpression->projectId);
         free(removeExpression);
     }
 }
@@ -54,8 +54,8 @@ void releaseRemoveExpression(RemoveExpression* removeExpression) {
 void releaseReplaceExpression(ReplaceExpression* replaceExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (replaceExpression != NULL) {
-        // free(replaceExpression->idToReplace);
-        // free(replaceExpression->projectId);
+        free(replaceExpression->idToReplace);
+        free(replaceExpression->projectId);
         releaseDefine(replaceExpression->define);
         free(replaceExpression);
     }
@@ -75,7 +75,7 @@ void releaseRelationshipExpression(RelationshipExpression* relationshipExpressio
     if (relationshipExpression != NULL) {
         releaseList(relationshipExpression->list);
         releaseRelationship(relationshipExpression->relationship);
-        // free(relationshipExpression->projectId);
+        free(relationshipExpression->projectId);
         releaseHierarchy(relationshipExpression->hierarchy);
         free(relationshipExpression);
     }
@@ -123,6 +123,9 @@ void releaseExpression(Expression* expression) {
             case RELATIONSHIP_EXPRESSION:
                 releaseRelationshipExpression(expression->relationshipExpression);
                 break;
+            case LIST_RELATIONSHIP_EXPRESSION:
+                releaseListRelationshipExpression(expression->listRelationshipExpression);
+                break;
             case LIST_EXPRESSION:
                 releaseListExpression(expression->listExpression);
                 break;
@@ -151,9 +154,9 @@ void releaseExpressions(Expressions* expressions) {
 void releaseAttribute(Attribute* attribute) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (attribute != NULL) {
-        // free(attribute->tag);
-        // if (attribute->attributeType == ATTRIBUTE_STRING)
-            // free(attribute->stringValue);
+        free(attribute->tag);
+        if (attribute->attributeType == ATTRIBUTE_STRING)
+            free(attribute->stringValue);
         free(attribute);
     }
 }
@@ -188,7 +191,7 @@ void releaseDefine(Define* define) {
     if (define != NULL) {
         switch (define->defineType) {
             case DEFINE_EMPLOYEE:
-                // free(define->employeeId);
+                free(define->employeeId);
                 break;
             case DEFINE_PROPERTIES:
                 releaseProperties(define->properties);
@@ -201,7 +204,7 @@ void releaseDefine(Define* define) {
 void releaseEmployees(Employees* employees) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (employees != NULL) {
-        // free(employees->employeesId);
+        free(employees->employeesId);
         free(employees);
     }
 }
@@ -212,10 +215,10 @@ void releaseList(List* list) {
         switch (list->listType) {
             case LIST_PROPERTIES:
                 releaseProperties(list->properties);
-                // free(list->projectId);
+                free(list->projectId);
                 break;
             case LIST_EMPLOYEE:
-                // free(list->employeeId);
+                free(list->employeeId);
                 break;
             case LIST_ELEMENTS:
                 releaseElements(list->elements);
@@ -228,8 +231,8 @@ void releaseList(List* list) {
 void releaseElements(Elements* elements) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (elements != NULL) {
-        // TODO: check if freeing each elements of ids is necessary
-        for (int i = 0; i < elements->count; i++) // free(elements->ids[i]);
+        for (int i = 0; i < elements->count; i++) 
+            free(elements->ids[i]);
         free(elements->ids);
         free(elements);
     }

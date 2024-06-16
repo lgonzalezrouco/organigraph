@@ -1,14 +1,14 @@
-#ifndef TREE_ADT_H
-#define TREE_ADT_H
+#ifndef PROJECT_ADT_H
+#define PROJECT_ADT_H
 
 #include <stdio.h>
 #include <stdlib.h>
 
 typedef struct projectCDT *projectADT;
 
-typedef struct employee {
+typedef struct Employee {
     void ** metadata;
-    struct node ** children;
+    struct Employee ** children;
     size_t childrenCount;
 } Employee;
 
@@ -20,7 +20,7 @@ int addEmployee(projectADT project, char ** metadata, TEmployee * childrens);
 
 int removeEmployee(projectADT project, TEmployee employee);
 
-int addChild(projectADT project, TEmployee employee, char ** metadata, TEmployee * children);
+int addChild(projectADT project, TEmployee * employees, char ** metadata, TEmployee * children);
 
 TEmployee * getChildren(projectADT project, TEmployee employee);
 

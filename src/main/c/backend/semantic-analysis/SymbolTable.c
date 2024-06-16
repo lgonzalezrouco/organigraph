@@ -36,7 +36,7 @@ void insertSymbol(SymbolTable* table, const char* lexeme, TokenType type, int sc
     if (table == NULL || lexeme == NULL) 
         return;
 
-    Symbol* existingEntry = lookupSymbol(table, lexeme);
+    Symbol* existingEntry = getSymbol(table, lexeme);
     if (existingEntry != NULL) {
         return;
     }
@@ -58,7 +58,7 @@ void insertSymbol(SymbolTable* table, const char* lexeme, TokenType type, int sc
     table->entries[table->size++] = newEntry;
 }
 
-Symbol* lookupSymbol(SymbolTable* table, const char* lexeme) {
+Symbol* getSymbol(SymbolTable* table, const char* lexeme) {
     if (table == NULL || lexeme == NULL) return NULL;
      for (size_t i = 0; i < table->size; ++i) {
         if (strcmp(table->entries[i].lexeme, lexeme) == 0) {
@@ -67,13 +67,4 @@ Symbol* lookupSymbol(SymbolTable* table, const char* lexeme) {
     }
 
     return NULL;
-}
-
-const char* tokenToString(TokenType type) {
-    switch (type) {
-        case TOKEN_UNKNOWN: return "UNKNOWN";
-        case TOKEN_EMPLOYEE: return "EMPLOYEE";
-        case TOKEN_PROJECT: return "PROJECT";
-        default: return "UNKNOWN";
-    }
 }

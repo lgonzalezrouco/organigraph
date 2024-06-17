@@ -34,8 +34,14 @@ void shutdownGeneratorModule() {
 static void _generateProgram(Program *program);
 static void _generateExpressions(Expressions *expressions);
 static void _generateExpression(Expression *expression);
+
 static void _generateProjectExpression(ProjectExpression *projectExpression);
+
 static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression);
+static void _generateProperties(TEmployee employee, Properties *properties);
+static void _generateAttributes(TEmployee employee, Attributes *attributes);
+static void _generateAttribute(TEmployee employee, Attribute *attribute);
+
 static void _generateEmployeeExpression(EmployeeExpression *employeeExpression);
 static void _generateRemoveExpression(RemoveExpression *removeExpression);
 static void _generateReplaceExpression(ReplaceExpression *replaceExpression);
@@ -61,8 +67,6 @@ static void _generateProgram(Program *program) {
 	}
 
 	_generateExpressions(program->expressions);
-
-	file
 }
 
 static void _generateExpressions(Expressions *expressions) {
@@ -132,11 +136,56 @@ static void _generateVariableEmployeeExpression(VariableEmployeeExpression *vari
 
 	state->sizeEmployees++;
 
-	variableEmployeeExpression->employeeId;
-
 	// TODO: check what to do with variableEmployeeExpression->employeeId (variable name)
-	setProperties(state->employees[state->sizeEmployees - 1], variableEmployeeExpression->properties);
+	_generateProperties(state->employees[state->sizeEmployees - 1], variableEmployeeExpression->properties);
 }
+
+static void _generateProperties(TEmployee employee, Properties *properties) {
+	_generateAttributes(employee, properties->attributes);
+}
+
+static void _generateAttributes(TEmployee employee, Attributes *attributes) {
+	for (int i = 0; i < attributes->count; i++) {
+		_generateAttribute(employee, attributes->attributes[i]);
+	}
+}
+
+static void _generateAttribute(TEmployee employee, Attribute *attribute) {
+	employee->metadata = (Metadata *) realloc(employee->metadata, employee->metadataCount + 1);
+	employee->metadata->tag = attribute->tag;
+	switch (attribute->attributeType)
+	{
+	case ATTRIBUTE_INTEGER:
+		employee->metadata->numValue = attribute->numValue;
+		break;
+	case ATTRIBUTE_STRING:
+		employee->metadata->stringValue = attribute->stringValue;
+		break;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) {
 	TEmployee employee = getEmployee(employeeExpression->employeeId);

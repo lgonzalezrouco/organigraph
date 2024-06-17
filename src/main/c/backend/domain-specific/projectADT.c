@@ -3,7 +3,7 @@
 struct projectCDT {
     size_t size;
     TEmployee root;
-	char name[256];
+    char name[256];
 };
 
 projectADT newProject() {
@@ -11,5 +11,9 @@ projectADT newProject() {
     project->root = NULL;
     project->size = 0;
     return project;
+}
+
+void setName(projectADT project, char *name) {
+    strcpy(project->name, name);
 }
 

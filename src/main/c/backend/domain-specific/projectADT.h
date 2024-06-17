@@ -4,17 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct projectCDT *projectADT;
+#include "Employee.h"
 
-typedef struct Employee {
-	void **metadata;
-	struct Employee **children;
-	size_t childrenCount;
-} Employee;
+typedef struct projectCDT *projectADT;
 
 typedef Employee *TEmployee;
 
 projectADT newProject();
+
+void setName(projectADT project, char *name);
 
 int addEmployee(projectADT project, char **metadata, TEmployee *children);
 
@@ -27,8 +25,6 @@ int addChild(projectADT project, TEmployee *employees, char **metadata, TEmploye
 TEmployee *getChildren(projectADT project, TEmployee employee);
 
 TEmployee *getChildrenAndSelf(projectADT project, TEmployee employee);
-
-void setName(projectADT project, char *name);
 
 char *generateJsonFromRoot(projectADT project);
 

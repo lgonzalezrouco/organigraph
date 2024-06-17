@@ -3,6 +3,7 @@
 struct projectCDT {
     size_t size;
     TEmployee root;
+	char name[256];
 };
 
 projectADT newProject() {

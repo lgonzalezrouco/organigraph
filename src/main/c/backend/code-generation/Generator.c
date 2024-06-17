@@ -6,6 +6,8 @@ const char _indentationCharacter = ' ';
 const char _indentationSize = 4;
 static Logger * _logger = NULL;
 
+FILE * file;
+
 void initializeGeneratorModule() {
 	_logger = createLogger("Generator");
 }
@@ -18,105 +20,92 @@ void shutdownGeneratorModule() {
 
 /** PRIVATE FUNCTIONS */
 
-static const char _expressionTypeToCharacter(const ExpressionType type);
-static void _generateConstant(const unsigned int indentationLevel, Constant * constant);
-static void _generateEpilogue(const int value);
-static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
-static void _generateFactor(const unsigned int indentationLevel, Factor * factor);
 static void _generateProgram(Program * program);
+static void _generateExpressions(const unsigned int indentationLevel, Expressions * expressions);
+static void _generateExpression(const unsigned int indentationLevel, Expression * expression);
+static void _generateProjectExpression(const unsigned int indentationLevel, ProjectExpression * projectExpression);
+static void _generateVariableEmployeeExpression(const unsigned int indentationLevel, VariableEmployeeExpression * variableEmployeeExpression);
+static void _generateEmployeeExpression(const unsigned int indentationLevel, EmployeeExpression * employeeExpression);
+static void _generateRemoveExpression(const unsigned int indentationLevel, RemoveExpression * removeExpression);
+static void _generateReplaceExpression(const unsigned int indentationLevel, ReplaceExpression * replaceExpression);
+static void _generateAssignExpression(const unsigned int indentationLevel, AssignExpression * assignExpression);
+static void _generateRelationshipExpression(const unsigned int indentationLevel, RelationshipExpression * relationshipExpression);
+static void _generateListRelationshipExpression(const unsigned int indentationLevel, ListRelationshipExpression * listRelationshipExpression);
+static void _generateListExpression(const unsigned int indentationLevel, ListExpression * listExpression);
+
 static void _generatePrologue(void);
+static void _generateEpilogue();
 static char * _indentation(const unsigned int indentationLevel);
 static void _output(const unsigned int indentationLevel, const char * const format, ...);
 
 /**
- * Converts and expression type to the proper character of the operation
- * involved, or returns '\0' if that's not possible.
+ * Generates the output of the program.
  */
-static const char _expressionTypeToCharacter(const ExpressionType type) {
-	switch (type) {
-		case ADDITION: return '+';
-		case DIVISION: return '/';
-		case MULTIPLICATION: return '*';
-		case SUBTRACTION: return '-';
-		default:
-			logError(_logger, "The specified expression type cannot be converted into character: %d", type);
-			return '\0';
-	}
+static void _generateProgram(Program * program) {
+    _generateExpressions(3, program->expressions);
 }
 
-/**
- * Generates the output of a constant.
- */
-static void _generateConstant(const unsigned int indentationLevel, Constant * constant) {
-	_output(indentationLevel, "%s", "[ $C$, circle, draw, black!20\n");
-	_output(1 + indentationLevel, "%s%d%s", "[ $", constant->value, "$, circle, draw ]\n");
-	_output(indentationLevel, "%s", "]\n");
-}
-
-/**
- * Creates the epilogue of the generated output, that is, the final lines that
- * completes a valid Latex document.
- */
-static void _generateEpilogue(const int value) {
-	_output(0, "%s%d%s",
-		"            [ $", value, "$, circle, draw, blue ]\n"
-		"        ]\n"
-		"    \\end{forest}\n"
-		"\\end{document}\n\n"
-	);
+static void _generateExpressions(const unsigned int indentationLevel, Expressions * expressions) {
+    for(int i = 0; i < expressions->count; i++) {
+        _generateExpression(indentationLevel + 1, expressions->expressions[i]);
+    }
 }
 
 /**
  * Generates the output of an expression.
  */
 static void _generateExpression(const unsigned int indentationLevel, Expression * expression) {
-	_output(indentationLevel, "%s", "[ $E$, circle, draw, black!20\n");
-	switch (expression->type) {
-		case ADDITION:
-		case DIVISION:
-		case MULTIPLICATION:
-		case SUBTRACTION:
-			_generateExpression(1 + indentationLevel, expression->leftExpression);
-			_output(1 + indentationLevel, "%s%c%s", "[ $", _expressionTypeToCharacter(expression->type), "$, circle, draw, purple ]\n");
-			_generateExpression(1 + indentationLevel, expression->rightExpression);
-			break;
-		case FACTOR:
-			_generateFactor(1 + indentationLevel, expression->factor);
-			break;
-		default:
-			logError(_logger, "The specified expression type is unknown: %d", expression->type);
-			break;
-	}
-	_output(indentationLevel, "%s", "]\n");
+    switch (expression->type) {
+        case PROJECT_EXPRESSION:
+            _generateProjectExpression(indentationLevel + 1, expression->projectExpression);
+            break;
+        case VARIABLE_EMPLOYEE_EXPRESSION:
+            _generateVariableEmployeeExpression(indentationLevel + 1, expression->variableEmployeeExpression);
+            break;
+        case EMPLOYEE_EXPRESSION:
+            _generateEmployeeExpression(indentationLevel + 1, expression->employeeExpression);
+            break;
+        case REMOVE_EXPRESSION:
+            _generateRemoveExpression(indentationLevel + 1, expression->removeExpression);
+            break;
+        case REPLACE_EXPRESSION:
+            _generateReplaceExpression(indentationLevel + 1, expression->replaceExpression);
+            break;
+        case ASSIGN_EXPRESSION:
+            _generateAssignExpression(indentationLevel + 1, expression->assignExpression);
+            break;
+        case RELATIONSHIP_EXPRESSION:
+            _generateRelationshipExpression(indentationLevel + 1, expression->relationshipExpression);
+            break;
+        case LIST_RELATIONSHIP_EXPRESSION:
+            _generateListRelationshipExpression(indentationLevel + 1, expression->listRelationshipExpression);
+            break;
+        case LIST_EXPRESSION:
+            _generateListExpression(indentationLevel + 1, expression->listExpression);
+            break;
+        default:
+            logError(_logger, "The specified expression type is unknown: %d", expression->type);
+            break;
+    }
 }
 
-/**
- * Generates the output of a factor.
- */
-static void _generateFactor(const unsigned int indentationLevel, Factor * factor) {
-	_output(indentationLevel, "%s", "[ $F$, circle, draw, black!20\n");
-	switch (factor->type) {
-		case CONSTANT:
-			_generateConstant(1 + indentationLevel, factor->constant);
-			break;
-		case EXPRESSION:
-			_output(1 + indentationLevel, "%s", "[ $($, circle, draw, purple ]\n");
-			_generateExpression(1 + indentationLevel, factor->expression);
-			_output(1 + indentationLevel, "%s", "[ $)$, circle, draw, purple ]\n");
-			break;
-		default:
-			logError(_logger, "The specified factor type is unknown: %d", factor->type);
-			break;
-	}
-	_output(indentationLevel, "%s", "]\n");
-}
+static void _generateProjectExpression(const unsigned int indentationLevel, ProjectExpression * projectExpression) {}
 
-/**
- * Generates the output of the program.
- */
-static void _generateProgram(Program * program) {
-	_generateExpression(3, program->expression);
-}
+static void _generateVariableEmployeeExpression(const unsigned int indentationLevel, VariableEmployeeExpression * variableEmployeeExpression) {}
+
+static void _generateEmployeeExpression(const unsigned int indentationLevel, EmployeeExpression * employeeExpression) {}
+
+static void _generateRemoveExpression(const unsigned int indentationLevel, RemoveExpression * removeExpression) {}
+
+static void _generateReplaceExpression(const unsigned int indentationLevel, ReplaceExpression * replaceExpression) {}
+
+static void _generateAssignExpression(const unsigned int indentationLevel, AssignExpression * assignExpression) {}
+
+static void _generateRelationshipExpression(const unsigned int indentationLevel, RelationshipExpression * relationshipExpression) {}
+
+static void _generateListRelationshipExpression(const unsigned int indentationLevel, ListRelationshipExpression * listRelationshipExpression) {}
+
+static void _generateListExpression(const unsigned int indentationLevel, ListExpression * listExpression) {}
 
 /**
  * Creates the prologue of the generated output, a Latex document that renders
@@ -125,18 +114,15 @@ static void _generateProgram(Program * program) {
  * @see https://ctan.dcc.uchile.cl/graphics/pgf/contrib/forest/forest-doc.pdf
  */
 static void _generatePrologue(void) {
-	_output(0, "%s",
-		"\\documentclass{standalone}\n\n"
-		"\\usepackage[utf8]{inputenc}\n"
-		"\\usepackage[T1]{fontenc}\n"
-		"\\usepackage{amsmath}\n"
-		"\\usepackage{forest}\n"
-		"\\usepackage{microtype}\n\n"
-		"\\begin{document}\n"
-		"    \\centering\n"
-		"    \\begin{forest}\n"
-		"        [ \\text{$=$}, circle, draw, purple\n"
-	);
+    fprintf(file, "%s", "{ \"nodes\": [");
+}
+
+/**
+ * Creates the epilogue of the generated output, that is, the final lines that
+ * completes a valid Latex document.
+ */
+static void _generateEpilogue() {
+    fprintf(file, "%s", "] }\n");
 }
 
 /**
@@ -164,8 +150,9 @@ static void _output(const unsigned int indentationLevel, const char * const form
 
 void generate(CompilerState * compilerState) {
 	logDebugging(_logger, "Generating final output...");
+    file = fopen("project.json", "w");
 	_generatePrologue();
 	_generateProgram(compilerState->abstractSyntaxtTree);
-	_generateEpilogue(compilerState->value);
+	_generateEpilogue();
 	logDebugging(_logger, "Generation is done.");
 }

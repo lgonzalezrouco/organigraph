@@ -3,6 +3,7 @@
 
 #include "Type.h"
 #include "stackADT.h"
+#include "../backend/semantic-analysis/SymbolTable.h"
 
 /**
  * The general status of a compilation.
@@ -24,7 +25,7 @@ typedef struct {
 	boolean succeed;
 
 	stackADT scopesStack;
-	// TODO: Add a symbol table.
+	SymbolTable * symbolTable;
 	// TODO: Add configuration.
 	// TODO: ...
 

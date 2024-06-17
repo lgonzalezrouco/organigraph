@@ -1,1 +1,1 @@
-employee empleado2 in mercadoLibre under (search { name: "Marcos" } in MercadoLibre);
+employee empleado2 under (search { name: "Marcos" });

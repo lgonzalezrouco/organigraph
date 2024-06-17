@@ -42,13 +42,10 @@
 "employee"                                  { return EmployeeLexemeAction(createLexicalAnalyzerContext()); }
 "{"                                         { return BracketLexemeAction(createLexicalAnalyzerContext(),OPEN_BRACKET); }
 "}"                                         { return BracketLexemeAction(createLexicalAnalyzerContext(),CLOSE_BRACKET); }
-"project"                                   { return ProjectLexemeAction(createLexicalAnalyzerContext()); }
-"in"                                        { return InLexemeAction(createLexicalAnalyzerContext()); }
 "under"                                     { return UnderLexemeAction(createLexicalAnalyzerContext()); }
 "search"                                    { return SearchLexemeAction(createLexicalAnalyzerContext()); }
 "="                                         { return AssignmentLexemeAction(createLexicalAnalyzerContext()); }
 "remove"                                    { return RemoveLexemeAction(createLexicalAnalyzerContext()); }
-"from"                                      { return FromLexemeAction(createLexicalAnalyzerContext()); }  
 "["                                         { return SquareBracketLexemeAction(createLexicalAnalyzerContext(),OPEN_SQUARE_BRACKET); }
 "]"                                         { return SquareBracketLexemeAction(createLexicalAnalyzerContext(),CLOSE_SQUARE_BRACKET); }
 "->"                                        { return ChildLexemeAction(createLexicalAnalyzerContext()); }

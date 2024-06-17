@@ -21,7 +21,6 @@ typedef enum DefineType DefineType;
 typedef enum AttributeType AttributeType;
 typedef enum ExpressionType ExpressionType;
 
-typedef struct ProjectExpression ProjectExpression;
 typedef struct VariableEmployeeExpression VariableEmployeeExpression;
 typedef struct EmployeeExpression EmployeeExpression;
 typedef struct RemoveExpression RemoveExpression;
@@ -56,7 +55,6 @@ enum DefineType { DEFINE_EMPLOYEE, DEFINE_PROPERTIES };
 enum AttributeType { ATTRIBUTE_STRING, ATTRIBUTE_INTEGER };
 
 enum ExpressionType {
-    PROJECT_EXPRESSION,
     VARIABLE_EMPLOYEE_EXPRESSION,
     EMPLOYEE_EXPRESSION,
     REMOVE_EXPRESSION,
@@ -67,9 +65,7 @@ enum ExpressionType {
     LIST_EXPRESSION
 };
 
-struct ProjectExpression {
-    char* projectId;
-};
+
 
 struct VariableEmployeeExpression {
     char* employeeId;
@@ -78,19 +74,16 @@ struct VariableEmployeeExpression {
 
 struct EmployeeExpression {
     char* employeeId;
-    char* projectId;
     Hierarchy* hierarchy;
     Properties* properties;
 };
 
 struct RemoveExpression {
     char* idToRemove;
-    char* projectId;
 };
 
 struct ReplaceExpression {
     char* idToReplace;
-    char* projectId;
     Define* define;
 };
 
@@ -102,7 +95,6 @@ struct AssignExpression {
 struct RelationshipExpression {
     List* list;
     Relationship* relationship;
-    char* projectId;
     Hierarchy* hierarchy;
 };
 
@@ -118,7 +110,6 @@ struct ListExpression {
 struct Expression {
     ExpressionType type;
     union {
-        ProjectExpression* projectExpression;
         VariableEmployeeExpression* variableEmployeeExpression;
         EmployeeExpression* employeeExpression;
         RemoveExpression* removeExpression;
@@ -175,10 +166,7 @@ struct Employees {
 
 struct List {
     union {
-        struct {
-            Properties* properties;
-            char* projectId;
-        };
+        Properties* properties;
         char* employeeId;
         Elements* elements;
     };
@@ -198,7 +186,6 @@ struct Relationship {
  * Node recursive destructors.
  */
 
-void releaseProjectExpression(ProjectExpression* projectExpression);
 void releaseVariableEmployeeExpression(VariableEmployeeExpression* variableEmployeeExpression);
 void releaseEmployeeExpression(EmployeeExpression* employeeExpression);
 void releaseRemoveExpression(RemoveExpression* removeExpression);

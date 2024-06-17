@@ -12,16 +12,6 @@ void shutdownAbstractSyntaxTreeModule() {
     }
 }
 
-/** PUBLIC FUNCTIONS */
-
-void releaseProjectExpression(ProjectExpression* projectExpression) {
-    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-    if (projectExpression != NULL) {
-        free(projectExpression->projectId);
-        free(projectExpression);
-    }
-}
-
 void releaseVariableEmployeeExpression(VariableEmployeeExpression* variableEmployeeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (variableEmployeeExpression != NULL) {
@@ -35,7 +25,6 @@ void releaseEmployeeExpression(EmployeeExpression* employeeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (employeeExpression != NULL) {
         free(employeeExpression->employeeId);
-        free(employeeExpression->projectId);
         releaseHierarchy(employeeExpression->hierarchy);
         releaseProperties(employeeExpression->properties);
         free(employeeExpression);
@@ -46,7 +35,6 @@ void releaseRemoveExpression(RemoveExpression* removeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (removeExpression != NULL) {
         free(removeExpression->idToRemove);
-        free(removeExpression->projectId);
         free(removeExpression);
     }
 }
@@ -55,7 +43,6 @@ void releaseReplaceExpression(ReplaceExpression* replaceExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (replaceExpression != NULL) {
         free(replaceExpression->idToReplace);
-        free(replaceExpression->projectId);
         releaseDefine(replaceExpression->define);
         free(replaceExpression);
     }
@@ -75,7 +62,6 @@ void releaseRelationshipExpression(RelationshipExpression* relationshipExpressio
     if (relationshipExpression != NULL) {
         releaseList(relationshipExpression->list);
         releaseRelationship(relationshipExpression->relationship);
-        free(relationshipExpression->projectId);
         releaseHierarchy(relationshipExpression->hierarchy);
         free(relationshipExpression);
     }
@@ -102,9 +88,6 @@ void releaseExpression(Expression* expression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (expression != NULL) {
         switch (expression->type) {
-            case PROJECT_EXPRESSION:
-                releaseProjectExpression(expression->projectExpression);
-                break;
             case VARIABLE_EMPLOYEE_EXPRESSION:
                 releaseVariableEmployeeExpression(expression->variableEmployeeExpression);
                 break;
@@ -215,7 +198,6 @@ void releaseList(List* list) {
         switch (list->listType) {
             case LIST_PROPERTIES:
                 releaseProperties(list->properties);
-                free(list->projectId);
                 break;
             case LIST_EMPLOYEE:
                 free(list->employeeId);

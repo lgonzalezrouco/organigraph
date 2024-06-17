@@ -1,7 +1,6 @@
-project mercadoLibre;
 
-employee empleado in mercadoLibre;
+employee empleado;
 
 employee empleado2;
 
-replace empleado from mercadoLibre with empleado2;
+replace empleado  with empleado2;

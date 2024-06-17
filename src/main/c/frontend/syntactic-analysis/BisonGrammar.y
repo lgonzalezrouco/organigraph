@@ -55,13 +55,10 @@
 %token <token> EMPLOYEE
 %token <token> OPEN_BRACKET
 %token <token> CLOSE_BRACKET
-%token <token> PROJECT
-%token <token> IN
 %token <token> UNDER
 %token <token> SEARCH
 %token <token> ASSIGN
 %token <token> REMOVE
-%token <token> FROM
 %token <token> OPEN_SQUARE_BRACKET
 %token <token> CLOSE_SQUARE_BRACKET
 %token <token> CHILD
@@ -111,14 +108,13 @@ expressions: expressions expression SEMICOLON						{ $$ = AppendExpressionSemant
 	| expression SEMICOLON											{ $$ = ExpressionSemanticAction($1); }
 	;
 
-expression: PROJECT ID												{ $$ = ProjectExpressionSemanticAction($2); }
-	| EMPLOYEE ID properties										{ $$ = VariableEmployeeExpressionSemanticAction($2, $3); }	
-	| EMPLOYEE ID IN ID hierarchy properties						{ $$ = EmployeeExpressionSemanticAction($2, $4, $5, $6); }
-	| ID IN ID hierarchy properties									{ $$ = EmployeeExpressionSemanticAction($1, $3, $4, $5); }
-	| REMOVE ID FROM ID												{ $$ = RemoveExpressionSemanticAction($2, $4); }
-	| REPLACE ID FROM ID WITH define								{ $$ = ReplaceExpressionSemanticAction($2, $4, $6); }
+expression: EMPLOYEE ID properties									{ $$ = VariableEmployeeExpressionSemanticAction($2, $3); }	
+	| EMPLOYEE ID hierarchy properties								{ $$ = EmployeeExpressionSemanticAction($2, $3, $4); }
+	| ID hierarchy properties										{ $$ = EmployeeExpressionSemanticAction($1, $2, $3); }
+	| REMOVE ID														{ $$ = RemoveExpressionSemanticAction($2); }
+	| REPLACE ID WITH define										{ $$ = ReplaceExpressionSemanticAction($2, $4); }
 	| employees ASSIGN list											{ $$ = AssignExpressionSemanticAction($1, $3); }
-	| list relationship IN ID hierarchy								{ $$ = RelationshipExpressionSemanticAction($1, $2, $4, $5); }
+	| list relationship hierarchy									{ $$ = RelationshipExpressionSemanticAction($1, $2, $3); }
 	| list relationship												{ $$ = ListRelationshipExpressionSemanticAction($1, $2); }
 	| list															{ $$ = ListExpressionSemanticAction($1); }
 	;
@@ -147,8 +143,8 @@ employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET		{ $$ = Employee
 	| ID															{ $$ = VariableEmployeesSemanticAction($1); }
 	;
 
-list: OPEN_PARENTHESIS SEARCH properties IN ID CLOSE_PARENTHESIS	{ $$ = ListSemanticAction($3, $5); }
-	| SEARCH properties IN ID										{ $$ = ListSemanticAction($2, $4); }
+list: OPEN_PARENTHESIS SEARCH properties CLOSE_PARENTHESIS			{ $$ = ListSemanticAction($3); }
+	| SEARCH properties												{ $$ = ListSemanticAction($2); }
 	| ID															{ $$ = VariableListSemanticAction($1); }
 	| OPEN_BRACKET elements CLOSE_BRACKET							{ $$ = ElementsListSemanticAction($2); }
 	;

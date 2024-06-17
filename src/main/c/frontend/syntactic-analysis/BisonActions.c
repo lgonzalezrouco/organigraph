@@ -62,15 +62,6 @@ Expressions* ExpressionSemanticAction(Expression* expression) {
 	return expressions;
 }
 
-Expression* ProjectExpressionSemanticAction(char* projectId) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Expression* expression = calloc(1, sizeof(Expression));
-    expression->type = PROJECT_EXPRESSION;
-    expression->projectExpression = calloc(1, sizeof(ProjectExpression));
-    expression->projectExpression->projectId = projectId;
-    return expression;
-}
-
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
@@ -80,34 +71,31 @@ Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Propertie
     return expression;
 }
 
-Expression* EmployeeExpressionSemanticAction(char* employeeId, char* projectId, Hierarchy* hierarchy,
+Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy,
                                              Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = EMPLOYEE_EXPRESSION;
     expression->employeeExpression = calloc(1, sizeof(EmployeeExpression));
     expression->employeeExpression->employeeId = employeeId;
-    expression->employeeExpression->projectId = projectId;
     expression->employeeExpression->hierarchy = hierarchy;
     expression->employeeExpression->properties = properties;
     return expression;
 }
-Expression* RemoveExpressionSemanticAction(char* idToRemove, char* projectId) {
+Expression* RemoveExpressionSemanticAction(char* idToRemove) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = REMOVE_EXPRESSION;
     expression->removeExpression = calloc(1, sizeof(RemoveExpression));
     expression->removeExpression->idToRemove = idToRemove;
-    expression->removeExpression->projectId = projectId;
     return expression;
 }
-Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* projectId, Define* define) {
+Expression* ReplaceExpressionSemanticAction(char* idToReplace, Define* define) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = REPLACE_EXPRESSION;
     expression->replaceExpression = calloc(1, sizeof(ReplaceExpression));
     expression->replaceExpression->idToReplace = idToReplace;
-    expression->replaceExpression->projectId = projectId;
     expression->replaceExpression->define = define;
     return expression;
 }
@@ -121,7 +109,7 @@ Expression* AssignExpressionSemanticAction(Employees* employees, List* list) {
     return expression;
 }
 
-Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, char* projectId,
+Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, 
                                                  Hierarchy* hierarchy) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
@@ -129,7 +117,6 @@ Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relat
     expression->relationshipExpression = calloc(1, sizeof(RelationshipExpression));
     expression->relationshipExpression->list = list;
     expression->relationshipExpression->relationship = relationship;
-    expression->relationshipExpression->projectId = projectId;
     expression->relationshipExpression->hierarchy = hierarchy;
 }
 
@@ -235,12 +222,11 @@ Employees* VariableEmployeesSemanticAction(char* employeeId) {
     return employees;
 }
 
-List* ListSemanticAction(Properties* properties, char* projectId) {
+List* ListSemanticAction(Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     List* list = calloc(1, sizeof(List));
     list->listType = LIST_PROPERTIES;
     list->properties = properties;
-    list->projectId = projectId;
     return list;
 }
 

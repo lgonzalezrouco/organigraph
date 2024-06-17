@@ -1,1 +1,1 @@
-(search { name: "Marcos" } in MercadoLibre) -> in MercadoLibre under { pedro, juan, marcos };
+(search { name: "Marcos" } in MercadoLibre) -> under { pedro, juan, marcos };

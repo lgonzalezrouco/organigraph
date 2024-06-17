@@ -22,14 +22,13 @@ void shutdownBisonActionsModule();
 Program* ExpressionsProgramSemanticAction(CompilerState* compilerState, Expressions* expressions);
 Expressions* AppendExpressionSemanticAction(Expressions* expressions, Expression* expression);
 Expressions* ExpressionSemanticAction(Expression* expression);
-Expression* ProjectExpressionSemanticAction(char* projectId);
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties);
-Expression* EmployeeExpressionSemanticAction(char* employeeId, char* projectId, Hierarchy* hierarchy,
+Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy,
                                              Properties* properties);
-Expression* RemoveExpressionSemanticAction(char* idToRemove, char* projectId);
-Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* projectId, Define* define);
+Expression* RemoveExpressionSemanticAction(char* idToRemove);
+Expression* ReplaceExpressionSemanticAction(char* idToReplace, Define* define);
 Expression* AssignExpressionSemanticAction(Employees* employees, List* list);
-Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, char* projectId,
+Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, 
                                                  Hierarchy* hierarchy);
 Expression* ListRelationshipExpressionSemanticAction(List* list, Relationship* relationship);
 Expression* ListExpressionSemanticAction(List* list);
@@ -43,7 +42,7 @@ Define* VariableDefineSemanticAction(char* employeeId);
 Define* PropertiesDefineSemanticAction(Properties* properties);
 Employees* EmployeesSemanticAction(char* employeeId);
 Employees* VariableEmployeesSemanticAction(char* employeeId);
-List* ListSemanticAction(Properties* properties, char* projectId);
+List* ListSemanticAction(Properties* properties);
 List* VariableListSemanticAction(char* employeesId);
 List* ElementsListSemanticAction(Elements* elements);
 Elements* AppendElementsSemanticAction(Elements* elements, char* employeeId);

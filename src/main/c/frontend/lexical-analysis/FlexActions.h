@@ -30,14 +30,11 @@ void EndOnelineCommentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerConte
 
 Token EmployeeLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token BracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token bracket);
-Token ProjectLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token InLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token UnderLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SearchLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token AssignmentLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token QuotationMarkLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token RemoveLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
-Token FromLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SquareBracketLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext, Token squareBracket);
 Token CommaLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);
 Token SemiColonLexemeAction(LexicalAnalyzerContext * lexicalAnalyzerContext);

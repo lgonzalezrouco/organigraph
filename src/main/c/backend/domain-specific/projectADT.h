@@ -14,13 +14,15 @@ projectADT newProject();
 
 void setName(projectADT project, char *name);
 
-int addEmployee(projectADT project, char **metadata, TEmployee *children);
+TEmployee getEmployee(projectADT project, char *employeeId);
+
+int addChild(projectADT project, TEmployee boss, TEmployee employee);
+
+int addEmployee(projectADT project, TEmployee employee);
 
 int removeEmployee(projectADT project, TEmployee employee);
 
 int replaceEmployee(projectADT project, TEmployee old, TEmployee new);
-
-int addChild(projectADT project, TEmployee *employees, char **metadata, TEmployee *children);
 
 TEmployee *getChildren(projectADT project, TEmployee employee);
 

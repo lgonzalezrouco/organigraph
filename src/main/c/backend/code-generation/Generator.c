@@ -50,6 +50,8 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 static void _generateListRelationshipExpression(ListRelationshipExpression *listRelationshipExpression);
 static void _generateListExpression(ListExpression *listExpression);
 
+static TEmployee newEmployee(char *employeeId, Properties *properties);
+
 static void _generatePrologue(void);
 static void _generateEpilogue();
 static char *_indentation(const unsigned int indentationLevel);
@@ -127,17 +129,7 @@ static void _generateProjectExpression(ProjectExpression *projectExpression) {
 }
 
 static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
-	state->employees = (TEmployee *) realloc(state->employees, state->sizeEmployees + 1);
-
-	if (state->employees == NULL) {
-		logError(_logger, "No hay mas memoria disponible");
-		return;
-	}
-
-	state->sizeEmployees++;
-
-	// TODO: check what to do with variableEmployeeExpression->employeeId (variable name)
-	_generateProperties(state->employees[state->sizeEmployees - 1], variableEmployeeExpression->properties);
+	newEmployee(variableEmployeeExpression->employeeId, variableEmployeeExpression->properties);
 }
 
 static void _generateProperties(TEmployee employee, Properties *properties) {
@@ -156,52 +148,46 @@ static void _generateAttribute(TEmployee employee, Attribute *attribute) {
 	switch (attribute->attributeType)
 	{
 	case ATTRIBUTE_INTEGER:
+		employee->metadata->metadataType = METADATA_INTEGER;
 		employee->metadata->numValue = attribute->numValue;
 		break;
 	case ATTRIBUTE_STRING:
+		employee->metadata->metadataType = METADATA_STRING;
 		employee->metadata->stringValue = attribute->stringValue;
 		break;
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) {
-	TEmployee employee = getEmployee(employeeExpression->employeeId);
+	projectADT project = getProject(employeeExpression->projectId);
+	TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
+
 	if (employee == NULL)
 		employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
 
-	projectADT project = getProject(employeeExpression->projectId);
-
 	if (employeeExpression->hierarchy == NULL)
 		addEmployee(project, employee);
-	else
-		addChild(project, employeeExpression->hierarchy, employee);
+	else {
+		switch (employeeExpression->hierarchy->list->listType) {
+		case LIST_PROPERTIES:
+			// TEmployee *bosses = searchEmployees(project, employeeExpression->hierarchy->list->properties); // TODO: check if should be deleted
+			break;
+		case LIST_ELEMENTS:
+			for(int i = 0; i < employeeExpression->hierarchy->list->elements->count; i++) {
+				TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->elements->ids[i]);
+				addChild(project, boss, employee);
+			}
+			break;
+		case LIST_EMPLOYEE:
+			TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
+			addChild(project, boss, employee);
+			break;
+		}
+	}
 }
 
 static void _generateRemoveExpression(RemoveExpression *removeExpression) {
-	TEmployee employee = getEmployee(removeExpression->idToRemove);
+	TEmployee employee = getEmployeeFromState(removeExpression->idToRemove);
 
 	projectADT project = getProject(removeExpression->projectId);
 
@@ -209,8 +195,9 @@ static void _generateRemoveExpression(RemoveExpression *removeExpression) {
 }
 
 static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
-	TEmployee old = getEmployee(replaceExpression->idToReplace);
 	projectADT project = getProject(replaceExpression->projectId);
+	TEmployee old = getEmployee(project, replaceExpression->idToReplace);
+	
 	TEmployee new;
 
 	switch (replaceExpression->define->defineType) {
@@ -223,6 +210,31 @@ static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
 	}
 	replaceEmployee(project, old, new);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 static void _generateAssignExpression(AssignExpression *assignExpression) {
 	// TODO: check if will be used
@@ -295,6 +307,39 @@ static void _output(const unsigned int indentationLevel, const char *const forma
 	free(effectiveFormat);
 	free(indentation);
 	va_end(arguments);
+}
+
+static TEmployee newEmployee(char *employeeId, Properties *properties) {
+	state->employees = (TEmployee *) realloc(state->employees, state->sizeEmployees + 1);
+
+	if (state->employees == NULL) {
+		logError(_logger, "No hay mas memoria disponible");
+		return;
+	}
+
+	state->sizeEmployees++;
+
+	TEmployee employee = (TEmployee) malloc(sizeof(struct Employee));
+	employee->employeeId = employeeId;
+	employee->metadata = NULL;
+	employee->metadataCount = 0;
+	employee->children = NULL;
+	employee->childrenCount = 0;
+	_generateProperties(employee, properties);
+
+	state->employees[state->sizeEmployees - 1] = employee;
+
+	return employee;
+}
+
+static TEmployee getEmployeeFromState(char *employeeId) {
+	for (int i = 0; i < state->sizeEmployees; i++) {
+		if (strcmp(state->employees[i]->employeeId, employeeId) == 0) {
+			return state->employees[i];
+		}
+	}
+
+	return NULL;
 }
 
 /** PUBLIC FUNCTIONS */

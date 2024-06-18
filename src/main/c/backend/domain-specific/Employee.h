@@ -18,9 +18,12 @@ typedef struct Metadata {
 typedef struct Employee {
 	Metadata *metadata;
 	size_t metadataCount;
+	struct Employee **bosses;
 	struct Employee **children;
 	size_t childrenCount;
 	size_t childrenSize;
+	size_t bossesCount;
+	size_t bossesSize;
 	char *employeeId;
 } Employee;
 

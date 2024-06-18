@@ -9,9 +9,7 @@ const char _indentationSize = 4;
 static Logger *_logger = NULL;
 
 typedef struct GeneratorState {
-	projectADT *projects;
 	TEmployee *employees;
-	size_t sizeProjects;
 	size_t sizeEmployees;
 } GeneratorState;
 
@@ -34,9 +32,6 @@ void shutdownGeneratorModule() {
 static void _generateProgram(Program *program);
 static void _generateExpressions(Expressions *expressions);
 static void _generateExpression(Expression *expression);
-
-static void _generateProjectExpression(ProjectExpression *projectExpression);
-
 static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression);
 static void _generateProperties(TEmployee employee, Properties *properties);
 static void _generateAttributes(TEmployee employee, Attributes *attributes);
@@ -82,9 +77,6 @@ static void _generateExpressions(Expressions *expressions) {
  */
 static void _generateExpression(Expression *expression) {
 	switch (expression->type) {
-		case PROJECT_EXPRESSION:
-			_generateProjectExpression(expression->projectExpression);
-			break;
 		case VARIABLE_EMPLOYEE_EXPRESSION:
 			_generateVariableEmployeeExpression(expression->variableEmployeeExpression);
 			break;
@@ -113,19 +105,6 @@ static void _generateExpression(Expression *expression) {
 			logError(_logger, "The specified expression type is unknown: %d", expression->type);
 			break;
 	}
-}
-
-static void _generateProjectExpression(ProjectExpression *projectExpression) {
-	state->projects = (projectADT *) realloc(state->projects, state->sizeProjects + 1);
-
-	if (state->projects == NULL) {
-		logError(_logger, "No hay mas memoria disponible");
-		return;
-	}
-
-	state->sizeProjects++;
-
-	setName(state->projects[state->sizeProjects - 1], projectExpression->projectId);
 }
 
 static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
@@ -159,26 +138,32 @@ static void _generateAttribute(TEmployee employee, Attribute *attribute) {
 }
 
 static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) {
-	projectADT project = getProject(employeeExpression->projectId);
 	TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
 
 	if (employee == NULL)
 		employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
-
-	if (employeeExpression->hierarchy == NULL)
-		addEmployee(project, employee);
-	else {
+	if (employeeExpression->hierarchy != NULL){
 		switch (employeeExpression->hierarchy->list->listType) {
-		case LIST_PROPERTIES:
+		case LIST_PROPERTIES://que quilombo
 			// TEmployee *bosses = searchEmployees(project, employeeExpression->hierarchy->list->properties); // TODO: check if should be deleted
 			break;
-		case LIST_ELEMENTS:
+		case LIST_ELEMENTS: //No estoy seguro si en este me equivoco pero no entiendo la diferencia entre list_elements y list_empolyee REVISAR
 			for(int i = 0; i < employeeExpression->hierarchy->list->elements->count; i++) {
-				TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->elements->ids[i]);
-				addChild(project, boss, employee);
+				TEmployee employeeAux = getEmployeeFromState(employeeExpression->hierarchy->list->elements->ids[i]);
+				if(employeeAux == NULL) {
+					//Aca tendria que haber error, entiendo que no lo acepta nuestra gramatica
+				}
+				else{
+					employee->bosses = (TEmployee *) realloc(employee->bosses, employee->bossesCount + 1);
+					employee->bosses[employee->bossesCount] = employeeAux;
+					employee->bossesCount++;
+					employeeAux->children = (TEmployee *) realloc(employeeAux->children, employeeAux->childrenCount + 1);
+					employeeAux->children[employeeAux->childrenCount] = employee;
+					employeeAux->childrenCount++;
+				}
 			}
 			break;
-		case LIST_EMPLOYEE:
+		case LIST_EMPLOYEE: //Mirar comentarios de arriba
 			TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
 			addChild(project, boss, employee);
 			break;
@@ -188,10 +173,18 @@ static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) 
 
 static void _generateRemoveExpression(RemoveExpression *removeExpression) {
 	TEmployee employee = getEmployeeFromState(removeExpression->idToRemove);
+	if(employee!=NULL){
+		for (size_t i = 0; i < employee->bossesSize; i++)
+		{
+			//Recorro los jefes y tengo que hacer que dejen de apuntar al empleado
 
-	projectADT project = getProject(removeExpression->projectId);
+		}
+		//Despues hago que el eempleado deje de apuntarlo a los jefes
+		//Hago ciclo para que los hijos dejen de apuntar al empleado
+		//Hago que el empleado deje de apuntar a los hijos
+		
+	}
 
-	removeEmployee(project, employee);
 }
 
 static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
@@ -199,6 +192,8 @@ static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
 	TEmployee old = getEmployee(project, replaceExpression->idToReplace);
 	
 	TEmployee new;
+
+	//Parecido a delete pero hago que en vez de simplemente dejar de apuntar al empleado, apunte al nuevo y el nuevo apunte a los que apuntaba el empleado
 
 	switch (replaceExpression->define->defineType) {
 		case DEFINE_EMPLOYEE:
@@ -310,6 +305,13 @@ static void _output(const unsigned int indentationLevel, const char *const forma
 }
 
 static TEmployee newEmployee(char *employeeId, Properties *properties) {
+	if(employeeId == NULL) {
+		logError(_logger, "No se puede crear un empleado sin id");
+		return;
+	}else if(getEmployeeFromState(employeeId) != NULL) {
+		logError(_logger, "El empleado ya existe");
+		return;
+	}
 	state->employees = (TEmployee *) realloc(state->employees, state->sizeEmployees + 1);
 
 	if (state->employees == NULL) {
@@ -321,10 +323,12 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
 
 	TEmployee employee = (TEmployee) malloc(sizeof(struct Employee));
 	employee->employeeId = employeeId;
-	employee->metadata = NULL;
+	employee->metadata = properties->attributes;
 	employee->metadataCount = 0;
 	employee->children = NULL;
 	employee->childrenCount = 0;
+	employee->bosses = NULL;
+	employee->bossesCount = 0;
 	_generateProperties(employee, properties);
 
 	state->employees[state->sizeEmployees - 1] = employee;

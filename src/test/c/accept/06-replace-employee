@@ -3,4 +3,4 @@ employee empleado;
 
 employee empleado2;
 
-replace empleado  with empleado2;
+replace empleado with empleado2;

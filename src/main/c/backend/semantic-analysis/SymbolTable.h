@@ -6,9 +6,8 @@
 
 typedef enum {
     TOKEN_UNKNOWN,
-    TOKEN_EMPLOYEE,
-    TOKEN_PROJECT
-} TokenType;
+    TOKEN_EMPLOYEE
+    } TokenType;
 
 typedef struct Symbol {
     char* lexeme;     

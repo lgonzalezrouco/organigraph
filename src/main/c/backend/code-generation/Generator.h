@@ -11,7 +11,7 @@
 #include <string.h>
 #include "../domain-specific/Employee.h"
 typedef Employee *TEmployee;
-
+typedef EmployeeList *TEmployeeList;
 /** Initialize module's internal state. */
 void initializeGeneratorModule();
 

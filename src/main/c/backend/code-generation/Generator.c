@@ -64,6 +64,8 @@ static TEmployee *getSelfAndChildren(TEmployee employee, size_t *size);
 static TEmployee *getSiblings(TEmployee employee, size_t *size);
 static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2);
 static TEmployee getEmployeeFromState(char *employeeId);
+static void fireEmployee(TEmployee employee);
+static TEmployee *getListFromState(char *id);
 
 static TEmployee newEmployee(char *employeeId, Properties *properties);
 static void _generatePrologue(void);
@@ -323,7 +325,14 @@ static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2,
     }
     return size1 + j;
 }
-
+static TEmployee* getListFromState(char *id){
+	for(int i=0;i<state->sizeLists;i++){
+		if(strcmp(state->lists[i]->id,id)==0){
+			return state->lists[i]->employees;
+		}
+	}
+	return NULL;
+}
 /**
  * Generates the output of the program.
  */
@@ -445,12 +454,14 @@ static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) 
                     }
                 }
                 break;
-                /*
-                case LIST_EMPLOYEE: //Revisar si vamos a sacar el assign
-                    TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
-                    addChild(project, boss, employee);
-                    break;
-                */
+                
+                case LIST_EMPLOYEE:
+                    TEmployee* boss = getListFromState(employeeExpression->hierarchy->list->employeeId);
+					for(int i=0;boss[i]!=NULL;i++){
+						addBoss(employee, boss[i]);
+						addChild(boss[i], employee);
+					}
+					break;  
         }
     }
 }
@@ -483,6 +494,7 @@ static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
 //SEGURO LO SACAMOS
 static void _generateAssignExpression(AssignExpression *assignExpression) {
     // TODO: check if will be used
+	
 }
 
 static TEmployee *searchEmployeesInState(Properties *properties) {
@@ -521,7 +533,11 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
             }
             break;
         case LIST_EMPLOYEE:
-
+				employees=getListFromState(relationshipExpression->list->employeeId);
+				if (employees == NULL) {
+                logError(_logger, "No se encontraron empleados con las propiedades especificadas");
+                return;
+            }
             break;
     }
 
@@ -562,6 +578,7 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
             }
             break;
         case LIST_EMPLOYEE:
+			bosses = getListFromState(relationshipExpression->hierarchy->list->employeeId);
             break;
         case LIST_ELEMENTS:
             for (int i = 0; i < relationshipExpression->hierarchy->list->elements->count; i++) {
@@ -661,6 +678,24 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
     state->employees[state->sizeEmployees - 1] = employee;
 
     return employee;
+}
+
+static TEmployee* newList(char *id, TEmployee *employees){
+	state->lists = (TEmployeeList *) realloc(state->lists, state->sizeLists + 1);
+	if(state->lists == NULL){
+		logError(_logger, "No hay mas memoria disponible");
+		return NULL;
+	}
+	state->sizeLists++;
+	TEmployeeList list = (TEmployeeList) malloc(sizeof(struct EmployeeList));
+	list->id = id;
+	list->employees = employees;
+	for(int i=0;employees[i]!=NULL;i++){
+		list->employeesSize++;
+	}
+	list->employeesCount = list->employeesSize;
+	state->lists[state->sizeLists - 1] = list;
+	return list;
 }
 
 static TEmployee getEmployeeFromState(char *employeeId) {

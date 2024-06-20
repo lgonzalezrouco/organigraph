@@ -27,4 +27,12 @@ typedef struct Employee {
 	char *employeeId;
 } Employee;
 
+typedef struct EmployeeList{
+	Employee **employees;
+	size_t employeesCount;
+	size_t employeesSize;
+	char *id;
+} EmployeeList;
+
+
 #endif

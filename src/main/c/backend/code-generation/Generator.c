@@ -325,7 +325,7 @@ static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2,
     }
     return size1 + j;
 }
-static TEmployee* getListFromState(char *id){
+static TEmployeeList getListFromState(char *id){
 	for(int i=0;i<state->sizeLists;i++){
 		if(strcmp(state->lists[i]->id,id)==0){
 			return state->lists[i]->employees;
@@ -491,10 +491,54 @@ static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
     replaceEmployee(old, new);
 }
 
-//SEGURO LO SACAMOS
 static void _generateAssignExpression(AssignExpression *assignExpression) {
-    // TODO: check if will be used
-	
+	TEmployee* employees=NULL;
+	int size=0;
+	switch(assignExpression->list->listType){
+		case LIST_PROPERTIES:
+		employees = searchEmployeesInState(assignExpression->list->properties);
+		if (employees == NULL) {
+			logError(_logger, "No se encontraron empleados con las propiedades especificadas");
+			exit(1);
+		}
+		for(int i=0;employees[i]!=NULL;i++){
+			size++;
+		}
+		break;
+		case LIST_ELEMENTS:
+		for (int i = 0; i < assignExpression->list->elements->count; i++) {
+			TEmployee employeeAux = getEmployeeFromState(assignExpression->list->elements->ids[i]);
+			size = concatenateEmployees(employees, &employeeAux, size, 1);
+		}
+		break;
+		case LIST_EMPLOYEE:
+		TEmployeeList aux=NULL;
+		aux = getListFromState(assignExpression->list->employeeId);
+		if (aux == NULL) {
+			logError(_logger, "No se encontraron empleados con las propiedades especificadas");
+			exit(1);
+		}
+		employees=aux->employees;
+		size=aux->employeesSize;
+		break;
+	}
+	TEmployeeList list=NULL;
+	switch (assignExpression->employees->employeesType)
+	{
+		case LIST:
+		list  = newList(assignExpression->employees->employeesId, employees);
+		break;	
+		case VARIABLE:
+		list = getListFromState(assignExpression->list->employeeId);
+			if (employees == NULL) {
+				logError(_logger, "No se encontro el empleado con id %s", assignExpression->employees->employeesId);
+				exit(1);
+			}
+		list->employees = employees;
+		list->employeesCount = size;
+		list->employeesSize = size;
+		break;
+	}
 }
 
 static TEmployee *searchEmployeesInState(Properties *properties) {
@@ -680,19 +724,25 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
     return employee;
 }
 
-static TEmployee* newList(char *id, TEmployee *employees){
+static TEmployeeList newList(char *id, TEmployee* employees){
 	state->lists = (TEmployeeList *) realloc(state->lists, state->sizeLists + 1);
 	if(state->lists == NULL){
 		logError(_logger, "No hay mas memoria disponible");
-		return NULL;
+		exit(2);
 	}
-	state->sizeLists++;
+
 	TEmployeeList list = (TEmployeeList) malloc(sizeof(struct EmployeeList));
-	list->id = id;
-	list->employees = employees;
+	if(list == NULL){
+		logError(_logger, "No hay mas memoria disponible");
+		exit(2);
+	}
+	list->employeesSize=0;
 	for(int i=0;employees[i]!=NULL;i++){
 		list->employeesSize++;
 	}
+	state->sizeLists++;
+	list->id = id;
+	list->employees = employees;
 	list->employeesCount = list->employeesSize;
 	state->lists[state->sizeLists - 1] = list;
 	return list;

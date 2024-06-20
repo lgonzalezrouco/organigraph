@@ -179,6 +179,7 @@ Employees* EmployeesSemanticAction(char* employeeId) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Employees* employees = calloc(1, sizeof(Employees));
     employees->employeesId = employeeId;
+    employees->employeesType = LIST;
     return employees;
 }
 
@@ -186,6 +187,8 @@ Employees* VariableEmployeesSemanticAction(char* employeeId) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Employees* employees = calloc(1, sizeof(Employees));
     employees->employeesId = employeeId;
+    employees->employeesType = VARIABLE;
+
     return employees;
 }
 

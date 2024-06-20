@@ -19,6 +19,7 @@ typedef enum RelationshipType RelationshipType;
 typedef enum ListType ListType;
 typedef enum AttributeType AttributeType;
 typedef enum ExpressionType ExpressionType;
+typedef enum EmployeesType EmployeesType;
 
 typedef struct VariableEmployeeExpression VariableEmployeeExpression;
 typedef struct EmployeeExpression EmployeeExpression;
@@ -47,6 +48,8 @@ enum RelationshipType { RELATIONSHIP_CHILD, RELATIONSHIP_SIBLING, RELATIONSHIP_C
 enum ListType { LIST_PROPERTIES, LIST_EMPLOYEE, LIST_ELEMENTS };
 
 enum AttributeType { ATTRIBUTE_STRING, ATTRIBUTE_INTEGER };
+
+enum EmployeesType { LIST, VARIABLE };
 
 enum ExpressionType {
     VARIABLE_EMPLOYEE_EXPRESSION,
@@ -136,6 +139,7 @@ struct Hierarchy {
 
 struct Employees {
     char* employeesId;
+    EmployeesType employeesType;
 };
 
 struct List {

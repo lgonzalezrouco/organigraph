@@ -43,7 +43,8 @@ void releaseReplaceExpression(ReplaceExpression* replaceExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (replaceExpression != NULL) {
         free(replaceExpression->idToReplace);
-        releaseDefine(replaceExpression->define);
+        free(replaceExpression->idToReplaceWith);
+        releaseProperties(replaceExpression->properties);
         free(replaceExpression);
     }
 }
@@ -64,23 +65,6 @@ void releaseRelationshipExpression(RelationshipExpression* relationshipExpressio
         releaseRelationship(relationshipExpression->relationship);
         releaseHierarchy(relationshipExpression->hierarchy);
         free(relationshipExpression);
-    }
-}
-
-void releaseListRelationshipExpression(ListRelationshipExpression* listRelationshipExpression) {
-    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-    if (listRelationshipExpression != NULL) {
-        releaseList(listRelationshipExpression->list);
-        releaseRelationship(listRelationshipExpression->relationship);
-        free(listRelationshipExpression);
-    }
-}
-
-void releaseListExpression(ListExpression* listExpression) {
-    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-    if (listExpression != NULL) {
-        releaseList(listExpression->list);
-        free(listExpression);
     }
 }
 
@@ -105,12 +89,6 @@ void releaseExpression(Expression* expression) {
                 break;
             case RELATIONSHIP_EXPRESSION:
                 releaseRelationshipExpression(expression->relationshipExpression);
-                break;
-            case LIST_RELATIONSHIP_EXPRESSION:
-                releaseListRelationshipExpression(expression->listRelationshipExpression);
-                break;
-            case LIST_EXPRESSION:
-                releaseListExpression(expression->listExpression);
                 break;
         }
         free(expression);
@@ -166,21 +144,6 @@ void releaseHierarchy(Hierarchy* hierarchy) {
     if (hierarchy != NULL) {
         releaseList(hierarchy->list);
         free(hierarchy);
-    }
-}
-
-void releaseDefine(Define* define) {
-    logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
-    if (define != NULL) {
-        switch (define->defineType) {
-            case DEFINE_EMPLOYEE:
-                free(define->employeeId);
-                break;
-            case DEFINE_PROPERTIES:
-                releaseProperties(define->properties);
-                break;
-        }
-        free(define);
     }
 }
 

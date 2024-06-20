@@ -25,7 +25,6 @@
 	Relationship * relationship;
 	Properties * properties;
 	Hierarchy * hierarchy;
-	Define * define;
 	
 }
 
@@ -46,7 +45,6 @@
 %destructor { releaseRelationship($$); } <relationship>
 %destructor { releaseProperties($$); } <properties>
 %destructor { releaseHierarchy($$); } <hierarchy>
-%destructor { releaseDefine($$); } <define>
 %destructor { releaseAttributes($$); } <attributes>
 */
 
@@ -91,8 +89,7 @@
 %type <elements> elements
 %type <relationship> relationship
 %type <properties> properties
-%type <hierarchy> hierarchy 
-%type <define> define
+%type <hierarchy> hierarchy
 
 /**
  * Precedence and associativity.
@@ -112,11 +109,9 @@ expression: EMPLOYEE ID properties									{ $$ = VariableEmployeeExpressionSema
 	| EMPLOYEE ID hierarchy properties								{ $$ = EmployeeExpressionSemanticAction($2, $3, $4); }
 	| ID hierarchy properties										{ $$ = EmployeeExpressionSemanticAction($1, $2, $3); }
 	| REMOVE ID														{ $$ = RemoveExpressionSemanticAction($2); }
-	| REPLACE ID WITH define										{ $$ = ReplaceExpressionSemanticAction($2, $4); }
+	| REPLACE ID WITH ID properties									{ $$ = ReplaceExpressionSemanticAction($2, $4, $5); }
 	| employees ASSIGN list											{ $$ = AssignExpressionSemanticAction($1, $3); }
 	| list relationship hierarchy									{ $$ = RelationshipExpressionSemanticAction($1, $2, $3); }
-	| list relationship												{ $$ = ListRelationshipExpressionSemanticAction($1, $2); }
-	| list															{ $$ = ListExpressionSemanticAction($1); }
 	;
 
 attributes: attributes COMMA attribute								{ $$ = AppendAttributesSemanticAction($1, $3); }
@@ -133,10 +128,6 @@ properties: OPEN_BRACKET attributes CLOSE_BRACKET					{ $$ = PropertiesSemanticA
 
 hierarchy: UNDER list												{ $$ = HierarchySemanticAction($2); }
 	| 																{ $$ = HierarchySemanticAction(NULL); }
-	;
-
-define: ID															{ $$ = VariableDefineSemanticAction($1); }
-	| properties													{ $$ = PropertiesDefineSemanticAction($1); }
 	;
 
 employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET		{ $$ = EmployeesSemanticAction($2); }

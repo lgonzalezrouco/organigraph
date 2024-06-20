@@ -23,23 +23,17 @@ Program* ExpressionsProgramSemanticAction(CompilerState* compilerState, Expressi
 Expressions* AppendExpressionSemanticAction(Expressions* expressions, Expression* expression);
 Expressions* ExpressionSemanticAction(Expression* expression);
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties);
-Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy,
-                                             Properties* properties);
+Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy, Properties* properties);
 Expression* RemoveExpressionSemanticAction(char* idToRemove);
-Expression* ReplaceExpressionSemanticAction(char* idToReplace, Define* define);
+Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* idToReplaceWith, Properties* properties);
 Expression* AssignExpressionSemanticAction(Employees* employees, List* list);
-Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, 
-                                                 Hierarchy* hierarchy);
-Expression* ListRelationshipExpressionSemanticAction(List* list, Relationship* relationship);
-Expression* ListExpressionSemanticAction(List* list);
+Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, Hierarchy* hierarchy);
 Attributes* AppendAttributesSemanticAction(Attributes* attributes, Attribute* attribute);
 Attributes* AttributeSemanticAction(Attribute* attribute);
 Attribute* StringMetadataSemanticAction(char* metadataId, char* value);
 Attribute* IntegerMetadataSemanticAction(char* metadataId, int value);
 Properties* PropertiesSemanticAction(Attributes* attributes);
 Hierarchy* HierarchySemanticAction(List* list);
-Define* VariableDefineSemanticAction(char* employeeId);
-Define* PropertiesDefineSemanticAction(Properties* properties);
 Employees* EmployeesSemanticAction(char* employeeId);
 Employees* VariableEmployeesSemanticAction(char* employeeId);
 List* ListSemanticAction(Properties* properties);

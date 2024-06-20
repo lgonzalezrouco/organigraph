@@ -50,7 +50,7 @@ static void addChild(TEmployee employee, TEmployee child);
 static void removeEmployee(TEmployee employee);
 static void RemoveBosses(TEmployee employee);
 static void RemoveChildren(TEmployee employee);
-static void replaceEmployee(TEmployee* old,TEmployee* new);
+static void replaceEmployee(TEmployee old,TEmployee new);
 static void replaceBosses(TEmployee old,TEmployee new);
 static void replaceChildren(TEmployee old,TEmployee new);
 static TEmployee getRoot(TEmployee employee);
@@ -141,7 +141,7 @@ static void RemoveChildren(TEmployee employee){
 						child->bosses[j] = NULL;
 						child->bossesCount--;
 						if(child->bossesCount == 0){ //Osea si este era el unico jefe que tenia hago que se desarme el arbol
-							RemoveEmployee(child);
+							removeEmployee(child);
 						}
 					}
 				}
@@ -153,7 +153,7 @@ static void RemoveChildren(TEmployee employee){
 		}
 }
 
-static void replaceEmployee(TEmployee* old,TEmployee* new){
+static void replaceEmployee(TEmployee old,TEmployee new){
 		if(old!=NULL && new!=NULL){
 			replaceBosses(old,new);
 			replaceChildren(old,new);
@@ -479,13 +479,12 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 			TEmployee root = getRoot(employees[0]); //tomo el del primero, asumo que todos pertenecen al  mismo grafo
 			employees = searchEmployees( root, relationshipExpression->list->properties);
 			break;
-		case LIST_EMPLOYEE:
-			employees = getEmployee(relationshipExpression->list->employeeId);
-			break;
-			/**
 		case LIST_ELEMENTS:
-			employees = getEmployees(relationshipExpression->list->elements);
-			break;*/
+			for(int i = 0; i < relationshipExpression->hierarchy->list->elements->count; i++) {
+				TEmployee employeeAux = getEmployeeFromState(relationshipExpression->list->elements->ids[i]);
+				concatenateEmployees(employees,&employeeAux,sizeof(employees),1);	
+			}
+			break;
 	}
 	TEmployee root = getRoot(employees[0]); //tomo el del primero, asumo que todos pertenecen al  mismo grafo para ser consistentes con los de arriba
 	for(int i = 0; i < sizeof(employees); i++) {
@@ -498,8 +497,7 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 					addChild(bosses[j],employees[i]);
 				}
 				break;
-				case LIST_EMPLOYEE:
-					case LIST_ELEMENTS: 
+				case  LIST_ELEMENTS:
 					for(int i = 0; i < relationshipExpression->hierarchy->list->elements->count; i++) {
 						TEmployee employeeAux = getEmployeeFromState(relationshipExpression->hierarchy->list->elements->ids[i]);
 						if(employeeAux != NULL) {
@@ -508,10 +506,6 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 						}
 					}
 					break;
-					/*
-				case LIST_ELEMENTS:
-					employees = getEmployees(relationshipExpression->list->elements);
-					break;*/
 			}
 		}
 	}	
@@ -567,16 +561,16 @@ static void _output(const unsigned int indentationLevel, const char *const forma
 static TEmployee newEmployee(char *employeeId, Properties *properties) {
 	if(employeeId == NULL) {
 		logError(_logger, "No se puede crear un empleado sin id");
-		return;
+		return NULL;
 	}else if(getEmployeeFromState(employeeId) != NULL) {
 		logError(_logger, "El empleado ya existe");
-		return;
+		return NULL;
 	}
 	state->employees = (TEmployee *) realloc(state->employees, state->sizeEmployees + 1);
 
 	if (state->employees == NULL) {
 		logError(_logger, "No hay mas memoria disponible");
-		return;
+		return NULL;
 	}
 
 	state->sizeEmployees++;

@@ -452,19 +452,45 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 
 	switch (relationshipExpression->list->listType) {
 		case LIST_PROPERTIES:
-			Properties *toSearchProperties = relationshipExpression->list->properties;
-			employees = searchEmployees( toSearchProperties);
+			TEmployee root = getRoot(employees[0]); //tomo el del primero, asumo que todos pertenecen al  mismo grafo
+			employees = searchEmployees( root, relationshipExpression->list->properties);
 			break;
 		case LIST_EMPLOYEE:
 			employees = getEmployee(relationshipExpression->list->employeeId);
 			break;
+			/**
 		case LIST_ELEMENTS:
 			employees = getEmployees(relationshipExpression->list->elements);
-			break;
+			break;*/
 	}
-
-	addHierarchy(project, employees, relationshipExpression->hierarchy, relationshipExpression->relationship);
-	
+	TEmployee root = getRoot(employees[0]); //tomo el del primero, asumo que todos pertenecen al  mismo grafo para ser consistentes con los de arriba
+	for(int i = 0; i < sizeof(employees); i++) {
+		if(employees[i]!=NULL){
+			switch (relationshipExpression->hierarchy->list->listType) {
+				case LIST_PROPERTIES:
+				TEmployee* bosses=searchEmployees(root,relationshipExpression->hierarchy->list->properties);
+				for(int j = 0; j < sizeof(employees); j++) {
+					addBoss(employees[i], bosses[j]);
+					addChild(bosses[j],employees[i]);
+				}
+				break;
+				case LIST_EMPLOYEE:
+					case LIST_ELEMENTS: 
+					for(int i = 0; i < relationshipExpression->hierarchy->list->elements->count; i++) {
+						TEmployee employeeAux = getEmployeeFromState(relationshipExpression->hierarchy->list->elements->ids[i]);
+						if(employeeAux != NULL) {
+							addBoss(employees[i], employeeAux);
+							addChild(employeeAux,employees[i]);
+						}
+					}
+					break;
+					/*
+				case LIST_ELEMENTS:
+					employees = getEmployees(relationshipExpression->list->elements);
+					break;*/
+			}
+		}
+	}	
 }
 
 static void _generateListRelationshipExpression(ListRelationshipExpression *listRelationshipExpression) {

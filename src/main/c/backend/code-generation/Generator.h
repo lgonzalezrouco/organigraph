@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Employee.h"
+#include "../domain-specific/Employee.h"
 typedef Employee *TEmployee;
 
 /** Initialize module's internal state. */

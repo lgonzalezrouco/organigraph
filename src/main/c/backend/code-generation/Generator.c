@@ -53,120 +53,7 @@ static void _generateEpilogue();
 static char *_indentation(const unsigned int indentationLevel);
 static void _output(const unsigned int indentationLevel, const char *const format, ...);
 
-/**
- * Generates the output of the program.
- */
-static void _generateProgram(Program *program) {
-	state = (GeneratorState *) calloc(1, sizeof(GeneratorState));
 
-	if (state == NULL) {
-		logError(_logger, "No hay mas memoria disponible");
-		return;
-	}
-
-	_generateExpressions(program->expressions);
-}
-
-static void _generateExpressions(Expressions *expressions) {
-	for (int i = 0; i < expressions->count; i++) {
-		_generateExpression(expressions->expressions[i]);
-	}
-}
-
-/**
- * Generates the output of an expression.
- */
-static void _generateExpression(Expression *expression) {
-	switch (expression->type) {
-		case VARIABLE_EMPLOYEE_EXPRESSION:
-			_generateVariableEmployeeExpression(expression->variableEmployeeExpression);
-			break;
-		case EMPLOYEE_EXPRESSION:
-			_generateEmployeeExpression(expression->employeeExpression);
-			break;
-		case REMOVE_EXPRESSION:
-			_generateRemoveExpression(expression->removeExpression);
-			break;
-		case REPLACE_EXPRESSION:
-			_generateReplaceExpression(expression->replaceExpression);
-			break;
-		case ASSIGN_EXPRESSION:
-			_generateAssignExpression(expression->assignExpression);
-			break;
-		case RELATIONSHIP_EXPRESSION:
-			_generateRelationshipExpression(expression->relationshipExpression);
-			break;
-		case LIST_RELATIONSHIP_EXPRESSION:
-			_generateListRelationshipExpression(expression->listRelationshipExpression);
-			break;
-		case LIST_EXPRESSION:
-			_generateListExpression(expression->listExpression);
-			break;
-		default:
-			logError(_logger, "The specified expression type is unknown: %d", expression->type);
-			break;
-	}
-}
-
-static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
-	newEmployee(variableEmployeeExpression->employeeId, variableEmployeeExpression->properties);
-}
-
-static void _generateProperties(TEmployee employee, Properties *properties) {
-	_generateAttributes(employee, properties->attributes);
-}
-
-static void _generateAttributes(TEmployee employee, Attributes *attributes) {
-	for (int i = 0; i < attributes->count; i++) {
-		_generateAttribute(employee, attributes->attributes[i]);
-	}
-}
-
-static void _generateAttribute(TEmployee employee, Attribute *attribute) {
-	employee->metadata = (Metadata *) realloc(employee->metadata, employee->metadataCount + 1);
-	employee->metadata->tag = attribute->tag;
-	switch (attribute->attributeType)
-	{
-	case ATTRIBUTE_INTEGER:
-		employee->metadata->metadataType = METADATA_INTEGER;
-		employee->metadata->numValue = attribute->numValue;
-		break;
-	case ATTRIBUTE_STRING:
-		employee->metadata->metadataType = METADATA_STRING;
-		employee->metadata->stringValue = attribute->stringValue;
-		break;
-	}
-}
-
-static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) {
-	TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
-
-	if (employee == NULL)
-		employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
-	if (employeeExpression->hierarchy != NULL){
-		switch (employeeExpression->hierarchy->list->listType) {
-		case LIST_PROPERTIES: //search que trae los jefes
-		_generateProperties(employee,employeeExpression->properties);
-		//No pongo el break para aprovechar lo que hace abajo
-		case LIST_ELEMENTS: 
-			for(int i = 0; i < employeeExpression->hierarchy->list->elements->count; i++) {
-				TEmployee employeeAux = getEmployeeFromState(employeeExpression->hierarchy->list->elements->ids[i]);
-				if(employeeAux == NULL) {
-					//Aca tendria que haber error, entiendo que no lo acepta nuestra gramatica
-				}
-				else{
-					addBoss(employee, employeeAux);
-					addChild(employeeAux,employee);
-				}
-			}
-			break;
-		case LIST_EMPLOYEE: //Revisar si vamos a sacar el assign
-			TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
-			addChild(project, boss, employee);
-			break;
-		}
-	}
-}
 
 static void addBoss(TEmployee employee, TEmployee boss){
 	employee->bosses = (TEmployee *) realloc(employee->bosses, employee->bossesSize + 1);
@@ -294,46 +181,247 @@ static void replaceChildren(TEmployee old,TEmployee new){
 		}
 	}
 
+
+static TEmployee getRoot(TEmployee employee){
+	if(employee->bossesCount == 0){
+		return employee;
+	}
+	else{
+		return getRoot(employee->bosses[0]);
+	}
+}
 //Quiero buscar empleados que cumplan con las propiedades en su metadata
-static TEmployee *searchEmployees(Properties *properties){
-	TEmployee *employees = NULL;
-	for (int i = 0; i < state->sizeEmployees; i++) {
-		TEmployee employee = state->employees[i];
-		if (employee->metadataCount == properties->attributes->count) {
-			bool found = true;
-			for (int j = 0; j < properties->attributes->count; j++) {
-				Attribute *attribute = properties->attributes->attributes[j];
-				bool foundAttribute = false;
-				for (int k = 0; k < employee->metadataCount; k++) {
-					Metadata *metadata = employee->metadata[k];
-					if (strcmp(metadata->tag, attribute->tag) == 0) {
-						switch (metadata->metadataType)
-						{
-						case METADATA_INTEGER:
-							if (metadata->numValue == attribute->numValue) {
-								foundAttribute = true;
-							}
-							break;
-						case METADATA_STRING:
-							if (strcmp(metadata->stringValue, attribute->stringValue) == 0) {
-								foundAttribute = true;
-							}
-							break;
-						}
-					}
-				}
-				if (!foundAttribute) {
-					found = false;
-					break;
+
+static TEmployee *searchEmployees(TEmployee root,Properties *properties){
+	TEmployee * employees;
+	employees = (TEmployee *) malloc(sizeof(TEmployee));
+	searchEmployeesRec(root,properties,employees);
+	return employees;
+
+}
+static void searchEmployeesRec(TEmployee employee,Properties* properties,TEmployee* employees){
+	if(isPresent(employee,employees)){
+		return;
+	}
+	if(hasProperties(employee,properties)){
+		employees = (TEmployee *) realloc(employees, sizeof(employees) + 1);
+		employees[sizeof(employees)] = employee;
+	}
+	for (size_t i = 0; i < employee->childrenCount; i++)
+	{
+		searchEmployeesRec(employee->children[i],properties,employees);
+	}
+
+}
+
+static bool hasProperties(TEmployee employee,Properties* properties){
+	for (size_t i = 0; i < properties->attributes->count; i++)
+	{
+		if(!hasAttribute(employee,properties->attributes->attributes[i])){
+			return false;
+		}
+	}
+	return true;
+} 
+static bool hasAttribute(TEmployee employee,Attribute* attribute){
+	for (size_t i = 0; i < employee->metadataCount; i++)
+	{
+		if(strcmp(employee->metadata[i].tag,attribute->tag) == 0){
+			if(employee->metadata[i].metadataType == METADATA_INTEGER){
+				if(employee->metadata[i].numValue == attribute->numValue){
+					return true;
 				}
 			}
-			if (found) {
-				employees = (TEmployee *) realloc(employees, sizeof(TEmployee) * (i + 1));
-				employees[i] = employee;
+			else if(employee->metadata[i].metadataType == METADATA_STRING){
+				if(strcmp(employee->metadata[i].stringValue,attribute->stringValue) == 0){
+					return true;
+				}
 			}
 		}
 	}
-	return employees;
+	return false;
+}
+
+static bool isPresent(TEmployee employee, TEmployee* employees){
+	for (int i = 0; i < sizeof(employees); i++) {
+		if(employees[i] == employee){
+			return true;
+		}
+	}
+	return false;
+}
+
+static TEmployee* getChildren(TEmployee employee,size_t* size){
+	TEmployee* children = (TEmployee *) malloc(sizeof(employee->children));
+	*size=0;
+	for (size_t i = 0; i < employee->childrenCount; i++)
+	{
+		if(employee->children[i] != NULL && !isPresent(employee->children[i],children)){
+			children[*size] = employee->children[i];
+			*size++;
+		}
+	}
+	return children;
+}
+
+static TEmployee* getSelfAndChildren(TEmployee employee,size_t* size){
+TEmployee* children = (TEmployee *) malloc(sizeof(employee->children)+sizeof(employee));
+	*size=0;
+	for (size_t i = 0; i < employee->childrenSize; i++)
+	{
+		if(employee->children[i] != NULL && !isPresent(employee->children[i],children)){
+			children[*size] = employee->children[i];
+			*size++;
+		}
+		
+	}
+	children[*size] = employee;
+	*size++;
+	return children;
+}
+
+static TEmployee* getSiblings(TEmployee employee,size_t* size){
+	TEmployee* siblings;
+	*size = 0;
+	for(int i=0;i<employee->bossesSize;i++){
+		TEmployee boss = employee->bosses[i];
+		*size=concatenateEmployees(siblings,getChildren(boss,size),*size,boss->childrenSize);
+	}
+	return siblings;
+}
+
+static size_t concatenateEmployees(TEmployee* employees1,TEmployee* employees2,size_t size1,size_t size2){
+	employees1=realloc(employees1,sizeof(employees1)+sizeof(employees2));
+	int j=0;
+	for (size_t i = 0; i < size2; i++)
+	{
+		if(employees2[i] != NULL && !isPresent(employees2[i],employees1)){
+			employees1[size1+j] = employees2[i];
+			j++;
+		}
+	}
+	return size1+j;
+}
+/**
+ * Generates the output of the program.
+ */
+static void _generateProgram(Program *program) {
+	state = (GeneratorState *) calloc(1, sizeof(GeneratorState));
+
+	if (state == NULL) {
+		logError(_logger, "No hay mas memoria disponible");
+		return;
+	}
+
+	_generateExpressions(program->expressions);
+}
+
+static void _generateExpressions(Expressions *expressions) {
+	for (int i = 0; i < expressions->count; i++) {
+		_generateExpression(expressions->expressions[i]);
+	}
+}
+
+/**
+ * Generates the output of an expression.
+ */
+static void _generateExpression(Expression *expression) {
+	switch (expression->type) {
+		case VARIABLE_EMPLOYEE_EXPRESSION:
+			_generateVariableEmployeeExpression(expression->variableEmployeeExpression);
+			break;
+		case EMPLOYEE_EXPRESSION:
+			_generateEmployeeExpression(expression->employeeExpression);
+			break;
+		case REMOVE_EXPRESSION:
+			_generateRemoveExpression(expression->removeExpression);
+			break;
+		case REPLACE_EXPRESSION:
+			_generateReplaceExpression(expression->replaceExpression);
+			break;
+		case ASSIGN_EXPRESSION:
+			_generateAssignExpression(expression->assignExpression);
+			break;
+		case RELATIONSHIP_EXPRESSION:
+			_generateRelationshipExpression(expression->relationshipExpression);
+			break;
+		case LIST_RELATIONSHIP_EXPRESSION:
+			_generateListRelationshipExpression(expression->listRelationshipExpression);
+			break;
+		case LIST_EXPRESSION:
+			_generateListExpression(expression->listExpression);
+			break;
+		default:
+			logError(_logger, "The specified expression type is unknown: %d", expression->type);
+			break;
+	}
+}
+
+static void _generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
+	newEmployee(variableEmployeeExpression->employeeId, variableEmployeeExpression->properties);
+}
+
+static void _generateProperties(TEmployee employee, Properties *properties) {
+	_generateAttributes(employee, properties->attributes);
+}
+
+static void _generateAttributes(TEmployee employee, Attributes *attributes) {
+	for (int i = 0; i < attributes->count; i++) {
+		_generateAttribute(employee, attributes->attributes[i]);
+	}
+}
+
+static void _generateAttribute(TEmployee employee, Attribute *attribute) {
+	employee->metadata = (Metadata *) realloc(employee->metadata, employee->metadataCount + 1);
+	employee->metadata->tag = attribute->tag;
+	switch (attribute->attributeType)
+	{
+	case ATTRIBUTE_INTEGER:
+		employee->metadata->metadataType = METADATA_INTEGER;
+		employee->metadata->numValue = attribute->numValue;
+		break;
+	case ATTRIBUTE_STRING:
+		employee->metadata->metadataType = METADATA_STRING;
+		employee->metadata->stringValue = attribute->stringValue;
+		break;
+	}
+}
+
+static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) {
+	TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
+
+	if (employee == NULL)
+		employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
+	if (employeeExpression->hierarchy != NULL){
+		switch (employeeExpression->hierarchy->list->listType) {
+		case LIST_PROPERTIES: //search que trae los jefes
+		TEmployee root = getRoot(employee);
+		TEmployee* employees=searchEmployees(root,employeeExpression->hierarchy->list->properties);
+		for(int i = 0; i < sizeof(employees); i++) {
+			addBoss(employee, employees[i]);
+			addChild(employees[i],employee);
+		}
+		break;
+		case LIST_ELEMENTS: 
+			for(int i = 0; i < employeeExpression->hierarchy->list->elements->count; i++) {
+				TEmployee employeeAux = getEmployeeFromState(employeeExpression->hierarchy->list->elements->ids[i]);
+				if(employeeAux == NULL) {
+					//Aca tendria que haber error, entiendo que no lo acepta nuestra gramatica
+				}
+				else{
+					addBoss(employee, employeeAux);
+					addChild(employeeAux,employee);
+				}
+			}
+			break;
+		/*
+		case LIST_EMPLOYEE: //Revisar si vamos a sacar el assign
+			TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
+			addChild(project, boss, employee);
+			break;
+		*/
+		}
+	}
 }
 
 static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
@@ -376,6 +464,7 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 	}
 
 	addHierarchy(project, employees, relationshipExpression->hierarchy, relationshipExpression->relationship);
+	
 }
 
 static void _generateListRelationshipExpression(ListRelationshipExpression *listRelationshipExpression) {

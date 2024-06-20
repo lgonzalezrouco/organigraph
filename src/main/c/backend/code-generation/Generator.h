@@ -8,6 +8,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "Employee.h"
+typedef Employee *TEmployee;
 
 /** Initialize module's internal state. */
 void initializeGeneratorModule();

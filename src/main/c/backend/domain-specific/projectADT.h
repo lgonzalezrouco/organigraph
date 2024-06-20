@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "Employee.h"
-
+typedef Employee *TEmployee;
 typedef struct projectCDT *projectADT;
 
 typedef Employee *TEmployee;

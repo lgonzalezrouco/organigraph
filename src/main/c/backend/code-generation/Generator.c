@@ -1,6 +1,7 @@
 #include "Generator.h"
 
-#include "../domain-specific/projectADT.h"
+#include <stdbool.h>
+
 
 /* MODULE INTERNAL STATE */
 
@@ -144,26 +145,22 @@ static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) 
 		employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
 	if (employeeExpression->hierarchy != NULL){
 		switch (employeeExpression->hierarchy->list->listType) {
-		case LIST_PROPERTIES://que quilombo
-			// TEmployee *bosses = searchEmployees(project, employeeExpression->hierarchy->list->properties); // TODO: check if should be deleted
-			break;
-		case LIST_ELEMENTS: //No estoy seguro si en este me equivoco pero no entiendo la diferencia entre list_elements y list_empolyee REVISAR
+		case LIST_PROPERTIES: //search que trae los jefes
+		_generateProperties(employee,employeeExpression->properties);
+		//No pongo el break para aprovechar lo que hace abajo
+		case LIST_ELEMENTS: 
 			for(int i = 0; i < employeeExpression->hierarchy->list->elements->count; i++) {
 				TEmployee employeeAux = getEmployeeFromState(employeeExpression->hierarchy->list->elements->ids[i]);
 				if(employeeAux == NULL) {
 					//Aca tendria que haber error, entiendo que no lo acepta nuestra gramatica
 				}
 				else{
-					employee->bosses = (TEmployee *) realloc(employee->bosses, employee->bossesCount + 1);
-					employee->bosses[employee->bossesCount] = employeeAux;
-					employee->bossesCount++;
-					employeeAux->children = (TEmployee *) realloc(employeeAux->children, employeeAux->childrenCount + 1);
-					employeeAux->children[employeeAux->childrenCount] = employee;
-					employeeAux->childrenCount++;
+					addBoss(employee, employeeAux);
+					addChild(employeeAux,employee);
 				}
 			}
 			break;
-		case LIST_EMPLOYEE: //Mirar comentarios de arriba
+		case LIST_EMPLOYEE: //Revisar si vamos a sacar el assign
 			TEmployee boss = getEmployee(project, employeeExpression->hierarchy->list->employeeId);
 			addChild(project, boss, employee);
 			break;
@@ -171,29 +168,179 @@ static void _generateEmployeeExpression(EmployeeExpression *employeeExpression) 
 	}
 }
 
+static void addBoss(TEmployee employee, TEmployee boss){
+	employee->bosses = (TEmployee *) realloc(employee->bosses, employee->bossesSize + 1);
+	employee->bosses[employee->bossesCount] = boss;
+	employee->bossesCount++;
+	employee->bossesSize++;
+}
+
+static void addChild(TEmployee employee,TEmployee child){
+	employee->children = (TEmployee *) realloc(employee->children, employee->childrenSize + 1);
+	employee->children[employee->childrenCount] = child;
+	employee->childrenSize++;
+	employee->childrenCount++;
+}
+
 static void _generateRemoveExpression(RemoveExpression *removeExpression) {
 	TEmployee employee = getEmployeeFromState(removeExpression->idToRemove);
-	if(employee!=NULL){
-		for (size_t i = 0; i < employee->bossesSize; i++)
-		{
-			//Recorro los jefes y tengo que hacer que dejen de apuntar al empleado
-
-		}
-		//Despues hago que el eempleado deje de apuntarlo a los jefes
-		//Hago ciclo para que los hijos dejen de apuntar al empleado
-		//Hago que el empleado deje de apuntar a los hijos
-		
-	}
+	removeEmployee(employee);
 
 }
 
+static void removeEmployee(TEmployee employee){
+	if(employee!=NULL){
+		RemoveBosses(employee);
+		RemoveChildren(employee);
+	}
+}
+
+static void RemoveBosses(TEmployee employee){
+	for (size_t i = 0; i < employee->bossesSize; i++)
+		{
+			//Recorro los jefes y tengo que hacer que dejen de apuntar al empleado
+			TEmployee boss = employee->bosses[i];
+			if(boss!=NULL){
+				//Hago que el jefe deje de apuntar al empleado
+				for (size_t j = 0; j < boss->childrenSize; j++)
+				{
+					if(boss->children[j] == employee){
+						boss->children[j] = NULL;
+						boss->childrenSize--;
+					}
+				}
+				//Hago que el empleado deje de apuntar al jefe
+				employee->bosses[i] = NULL;
+				employee->bossesCount--;
+			}
+
+		}
+}
+
+static void RemoveChildren(TEmployee employee){
+	for (size_t i = 0; i < employee->childrenSize; i++)
+		{
+			//Recorro los hijos y tengo que hacer que dejen de apuntar al empleado
+			TEmployee child = employee->children[i];
+			if(child!=NULL){
+				//Hago que el hijo deje de apuntar al empleado
+				for (size_t j = 0; j < child->bossesSize; j++)
+				{
+					if(child->bosses[j] == employee){
+						child->bosses[j] = NULL;
+						child->bossesCount--;
+						if(child->bossesCount == 0){ //Osea si este era el unico jefe que tenia hago que se desarme el arbol
+							freeEmployee(child);
+						}
+					}
+				}
+				//Hago que el empleado deje de apuntar al hijo
+				employee->children[i] = NULL;
+				employee->childrenCount--;
+			}
+
+		}
+}
+
+static void replaceEmployee(TEmployee* old,TEmployee* new){
+		if(old!=NULL && new!=NULL){
+			replaceBosses(old,new);
+			replaceChildren(old,new);
+		}
+
+	}
+
+static void replaceBosses(TEmployee old,TEmployee new){
+		for (size_t i = 0; i < old->bossesCount; i++)
+		{
+			//Recorro los jefes y tengo que hacer que dejen de apuntar al empleado
+			TEmployee boss = old->bosses[i];
+			if(boss!=NULL){
+				//Hago que el jefe deje de apuntar al empleado
+				for (size_t j = 0; j < boss->childrenSize; j++)
+				{
+					if(boss->children[j] == old){
+						boss->children[j] = new;
+					}
+				}
+				//Hago que el empleado deje de apuntar al jefe
+				addBoss(new,boss);
+				old->bosses[i] = NULL;
+				old->bossesCount--;
+			}
+
+		}
+	}
+
+static void replaceChildren(TEmployee old,TEmployee new){
+		for (size_t i = 0; i < old->childrenSize; i++)
+		{
+			//Recorro los hijos y tengo que hacer que dejen de apuntar al empleado
+			TEmployee child = old->children[i];
+			if(child!=NULL){
+				//Hago que el hijo deje de apuntar al empleado
+				for (size_t j = 0; j < child->bossesSize; j++)
+				{
+					if(child->bosses[j] == old){
+						child->bosses[j] = new;
+					}
+				}
+				//Hago que el empleado deje de apuntar al hijo
+				addChild(new,child);
+				old->children[i] = NULL;
+				old->childrenCount--;
+			}
+
+		}
+	}
+
+//Quiero buscar empleados que cumplan con las propiedades en su metadata
+static TEmployee *searchEmployees(Properties *properties){
+	TEmployee *employees = NULL;
+	for (int i = 0; i < state->sizeEmployees; i++) {
+		TEmployee employee = state->employees[i];
+		if (employee->metadataCount == properties->attributes->count) {
+			bool found = true;
+			for (int j = 0; j < properties->attributes->count; j++) {
+				Attribute *attribute = properties->attributes->attributes[j];
+				bool foundAttribute = false;
+				for (int k = 0; k < employee->metadataCount; k++) {
+					Metadata *metadata = employee->metadata[k];
+					if (strcmp(metadata->tag, attribute->tag) == 0) {
+						switch (metadata->metadataType)
+						{
+						case METADATA_INTEGER:
+							if (metadata->numValue == attribute->numValue) {
+								foundAttribute = true;
+							}
+							break;
+						case METADATA_STRING:
+							if (strcmp(metadata->stringValue, attribute->stringValue) == 0) {
+								foundAttribute = true;
+							}
+							break;
+						}
+					}
+				}
+				if (!foundAttribute) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				employees = (TEmployee *) realloc(employees, sizeof(TEmployee) * (i + 1));
+				employees[i] = employee;
+			}
+		}
+	}
+	return employees;
+}
+
 static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
-	projectADT project = getProject(replaceExpression->projectId);
-	TEmployee old = getEmployee(project, replaceExpression->idToReplace);
+	TEmployee old = getEmployeeFromState(replaceExpression->idToReplace);
 	
 	TEmployee new;
 
-	//Parecido a delete pero hago que en vez de simplemente dejar de apuntar al empleado, apunte al nuevo y el nuevo apunte a los que apuntaba el empleado
 
 	switch (replaceExpression->define->defineType) {
 		case DEFINE_EMPLOYEE:
@@ -203,48 +350,22 @@ static void _generateReplaceExpression(ReplaceExpression *replaceExpression) {
 			new = newEmployee(generateNewEmployeeId(), replaceExpression->define->properties);
 			break;
 	}
-	replaceEmployee(project, old, new);
+	replaceEmployee(old, new);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//SEGURO LO SACAMOS
 static void _generateAssignExpression(AssignExpression *assignExpression) {
 	// TODO: check if will be used
 }
 
 static void _generateRelationshipExpression(RelationshipExpression *relationshipExpression) {
-	projectADT project = getProject(relationshipExpression->projectId);
 
 	TEmployee * employees;
 
 	switch (relationshipExpression->list->listType) {
 		case LIST_PROPERTIES:
 			Properties *toSearchProperties = relationshipExpression->list->properties;
-			projectADT toSearchProject = getProject(relationshipExpression->list->projectId);
-			employees = searchEmployees(toSearchProject, toSearchProperties);
+			employees = searchEmployees( toSearchProperties);
 			break;
 		case LIST_EMPLOYEE:
 			employees = getEmployee(relationshipExpression->list->employeeId);
@@ -323,7 +444,7 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
 
 	TEmployee employee = (TEmployee) malloc(sizeof(struct Employee));
 	employee->employeeId = employeeId;
-	employee->metadata = properties->attributes;
+	employee->metadata = NULL;
 	employee->metadataCount = 0;
 	employee->children = NULL;
 	employee->childrenCount = 0;

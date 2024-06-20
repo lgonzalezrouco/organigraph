@@ -510,6 +510,18 @@ static void _generateRelationshipExpression(RelationshipExpression *relationship
 		}
 	}	
 }
+//Destruye al nodo empleado
+static void fireEmployee(TEmployee employee){
+	if(employee!=NULL){
+	removeEmployee(employee);
+		for(int i=0;i<state->sizeEmployees;i++){
+			if(state->employees[i] == employee){
+				state->employees[i] = NULL;
+			}
+		}
+		free(employee);
+	}
+}
 
 static void _generateListRelationshipExpression(ListRelationshipExpression *listRelationshipExpression) {
 	// TODO: check if will be used (there is no project id)

@@ -45,6 +45,30 @@ static void _generateAssignExpression(AssignExpression *assignExpression);
 static void _generateRelationshipExpression(RelationshipExpression *relationshipExpression);
 static void _generateListRelationshipExpression(ListRelationshipExpression *listRelationshipExpression);
 static void _generateListExpression(ListExpression *listExpression);
+static void addBoss(TEmployee employee, TEmployee boss);
+static void addChild(TEmployee employee, TEmployee child);
+static void removeEmployee(TEmployee employee);
+static void RemoveBosses(TEmployee employee);
+static void RemoveChildren(TEmployee employee);
+static void replaceEmployee(TEmployee* old,TEmployee* new);
+static void replaceBosses(TEmployee old,TEmployee new);
+static void replaceChildren(TEmployee old,TEmployee new);
+static TEmployee getRoot(TEmployee employee);
+static TEmployee *searchEmployees(TEmployee root,Properties *properties);
+static void searchEmployeesRec(TEmployee employee,Properties* properties,TEmployee* employees);
+static bool hasProperties(TEmployee employee,Properties* properties);
+static bool hasAttribute(TEmployee employee,Attribute* attribute);
+static bool isPresent(TEmployee employee, TEmployee* employees);
+static TEmployee* getChildren(TEmployee employee,size_t* size);
+static TEmployee* getSelfAndChildren(TEmployee employee,size_t* size);
+static TEmployee* getSiblings(TEmployee employee,size_t* size);
+static size_t concatenateEmployees(TEmployee* employees1,TEmployee* employees2,size_t size1,size_t size2);
+static TEmployee getEmployeeFromState(char *employeeId);
+static void _generatePrologue(void);
+static void _generateEpilogue();
+static char *_indentation(const unsigned int indentationLevel);
+static void _output(const unsigned int indentationLevel, const char *const format, ...);
+
 
 static TEmployee newEmployee(char *employeeId, Properties *properties);
 
@@ -117,7 +141,7 @@ static void RemoveChildren(TEmployee employee){
 						child->bosses[j] = NULL;
 						child->bossesCount--;
 						if(child->bossesCount == 0){ //Osea si este era el unico jefe que tenia hago que se desarme el arbol
-							freeEmployee(child);
+							RemoveEmployee(child);
 						}
 					}
 				}

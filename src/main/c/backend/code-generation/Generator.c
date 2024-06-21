@@ -323,10 +323,7 @@ static bool isPresent(TEmployee employee, TEmployee *employees) {
 }
 
 static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2) {
-    if(employees1 == NULL){
-        logError(logger, "No se puede concatenar empleados nulos");
-        return -1;
-    }
+    
     if (employees2 == NULL)
         return size1;
     int j = 0;

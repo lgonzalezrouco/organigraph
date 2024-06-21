@@ -67,7 +67,7 @@ static bool hasAttributes(TEmployee employee, Attributes *attributes);
 static bool hasAttribute(TEmployee employee, Attribute *attribute);
 static bool isPresent(TEmployee employee, TEmployee *employees);
 
-static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2);
+static size_t concatenateEmployees(TEmployee **employees1, TEmployee *employees2, size_t size1, size_t size2);
 
 
 static TEmployeeList getListFromState(char *id);
@@ -76,7 +76,7 @@ static TEmployeeList newList(char *id, TEmployee *employees);
 static void addBoss(TEmployee employee, TEmployee boss) {
     TEmployee *temp = (TEmployee *) realloc(employee->bosses, (employee->bossesSize + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available1");
+        logError(logger, "No hay mas memoria disponible");
         free(employee->bosses);
         exit(1);
     }
@@ -93,7 +93,7 @@ static void addBoss(TEmployee employee, TEmployee boss) {
 static void addChild(TEmployee employee, TEmployee child) {
     TEmployee *temp = (TEmployee *) realloc(employee->children, (employee->childrenSize + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available3");
+        logError(logger, "No hay mas memoria disponible");
         free(employee->children);
         exit(-1);
     }
@@ -128,10 +128,6 @@ static void removeEmployee(TEmployee employee) {
 }
 
 static void removeBosses(TEmployee employee) {
-    if(employee==NULL){
-        logError(logger, "No se puede remover los jefes de un empleado nulo");
-        exit(1);
-    }
     for (size_t i = 0; i < employee->bossesSize; i++) {
         TEmployee boss = employee->bosses[i];
         if (boss != NULL) {
@@ -240,7 +236,7 @@ static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmpl
     if (hasAttributes(employee, attributes)) {
         TEmployee *temp = (TEmployee *) realloc(employees, (*size + 1) * sizeof(TEmployee));
         if (temp == NULL) {
-            logError(logger, "No more memory available4");
+            logError(logger, "No hay mas memoria disponible");
             free(employees);
             exit(-1);
         }
@@ -322,20 +318,20 @@ static bool isPresent(TEmployee employee, TEmployee *employees) {
     return false;
 }
 
-static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2) {
-    
-    if (employees2 == NULL)
-        return size1;
+static size_t concatenateEmployees(TEmployee **employees1, TEmployee *employees2, size_t size1, size_t size2) {
+    TEmployee *temp = (TEmployee *) realloc(*employees1, (size1 + size2) * sizeof(TEmployee));
+    if (temp == NULL) {
+        logError(logger, "No hay mas memoria disponible");
+        if (*employees1 != NULL)
+            free(*employees1);
+        exit(-1);
+    }
+    *employees1 = temp;
     int j = 0;
-    TEmployee *temp = (TEmployee *) realloc(employees1, (size1 + size2 + 1) * sizeof(TEmployee));
     for (size_t i = 0; i < size2; i++) {
-        if (employees2[i] != NULL && !isPresent(employees2[i], employees1)) {
-            if (temp == NULL) {
-                logError(logger, "No more memory available5");
-                return -1;
-            }
-            employees1 = temp;
-            employees1[size1 + j] = employees2[i];
+        if (employees2[i] != NULL && !isPresent(employees2[i], *employees1)) {
+            logInformation(logger, "employee %s", employees2[i]->employeeId);
+            (*employees1)[size1 + j] = employees2[i];
             j++;
         }
     }
@@ -447,15 +443,12 @@ static void generateExpression(Expression *expression) {
 
     switch (expression->type) {
         case VARIABLE_EMPLOYEE_EXPRESSION:
-            logInformation(logger, "Generating variable employee expression...");
             generateVariableEmployeeExpression(expression->variableEmployeeExpression);
             break;
         case EMPLOYEE_EXPRESSION:
-            logInformation(logger, "Generating employee expression...");
             generateEmployeeExpression(expression->employeeExpression);
             break;
         case REMOVE_EXPRESSION:
-            logInformation(logger, "Generating remove expression...");
             generateRemoveExpression(expression->removeExpression);
             break;
         case REPLACE_EXPRESSION:
@@ -486,11 +479,8 @@ static void generateProperties(TEmployee employee, Properties *properties) {
         logError(logger, "No se puede agregar propiedades a un empleado nulo");
         exit(1);
     }
-    if (properties != NULL) {
-        logInformation(logger, "Generating properties...");
+    if (properties != NULL)
         generateAttributes(employee, properties->attributes);
-    } else
-        logInformation(logger, "No properties to generate");
 }
 
 static void generateAttributes(TEmployee employee, Attributes *attributes) {
@@ -510,14 +500,12 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
 
     Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
     if (temp == NULL) {
-        logError(logger, "No more memory available");
+        logError(logger, "No hay mas memoria disponible");
         if (employee->metadata != NULL)
             free(employee->metadata);
         exit(-1);
     }
     employee->metadata = temp;
-
-    logInformation(logger, "Asignando la metadata al empleado con id %s", employee->employeeId);
 
     employee->metadata[employee->metadataCount].tag = attribute->tag;
     switch (attribute->attributeType) {
@@ -526,7 +514,6 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
             employee->metadata[employee->metadataCount].numValue = attribute->numValue;
             break;
         case ATTRIBUTE_STRING:
-            logInformation(logger, "Adding string attribute: %s", attribute->stringValue);
             employee->metadata[employee->metadataCount].metadataType = METADATA_STRING;
             employee->metadata[employee->metadataCount].stringValue = attribute->stringValue;
             break;
@@ -541,23 +528,19 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
     }
     TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
     TEmployeeList list;
-    TEmployee root;
 
     if (employee == NULL) {
-        logInformation(logger, "Creando empleado con id %s", employeeExpression->employeeId);
         employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
         if (employee == NULL) {
             logError(logger, "No se pudo crear el empleado con id %s", employeeExpression->employeeId);
             exit(1);
         }
     } else {
-        logInformation(logger, "Agregando propiedades al empleado con id %s", employeeExpression->employeeId);
         generateProperties(employee, employeeExpression->properties);
     }
 
     switch (employeeExpression->list->listType) {
         case LIST_PROPERTIES:
-            logInformation(logger, "Agregando jefes al empleado con id %s con propiedades", employeeExpression->employeeId);
             TEmployee *employees = searchEmployeesInState(employeeExpression->list->attributes);
             if (employees == NULL || employees[0] == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
@@ -571,25 +554,19 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
             }
             break;
         case LIST_ELEMENTS:
-            logInformation(logger, "Agregando jefes al empleado con id %s con lista de elementos", employeeExpression->employeeId);
             for (int i = 0; i < employeeExpression->list->elements->count; i++) {
                 TEmployee employeeAux = getEmployeeFromState(employeeExpression->list->elements->ids[i]);
                 if (employeeAux == NULL) {
                     logError(logger, "No se encontro el empleado con id %s",
                              employeeExpression->list->elements->ids[i]);
+                    exit(1);
                 } else {
-                    logInformation(logger, "Agregando jefe con id %s al empleado con id %s", employeeAux->employeeId,
-                                   employeeExpression->employeeId);
                     addBoss(employee, employeeAux);
-                    logInformation(logger, "Agregando empleado con id %s como hijo del empleado con id %s",
-                                   employeeExpression->employeeId, employeeAux->employeeId);
                     addChild(employeeAux, employee);
                 }
             }
             break;
-
         case LIST_EMPLOYEE:
-            logInformation(logger, "Agregando jefes al empleado con id %s con variable", employeeExpression->employeeId);
             list = getListFromState(employeeExpression->list->employeeId);
             if (list == NULL) {
                 logError(logger, "No se encontro la lista con id %s", employeeExpression->list->employeeId);
@@ -655,13 +632,17 @@ static void generateAssignExpression(AssignExpression *assignExpression) {
         case LIST_ELEMENTS:
             for (int i = 0; i < assignExpression->list->elements->count; i++) {
                 TEmployee employeeAux = getEmployeeFromState(assignExpression->list->elements->ids[i]);
-                size = concatenateEmployees(employees, &employeeAux, size, 1);
+                if (employeeAux == NULL) {
+                    logError(logger, "No se encontro el empleado con id %s", assignExpression->list->elements->ids[i]);
+                    exit(1);
+                }
+                size = concatenateEmployees(&employees, &employeeAux, size, 1);
             }
             break;
         case LIST_EMPLOYEE:
             aux = getListFromState(assignExpression->list->employeeId);
             if (aux == NULL) {
-                logError(logger, "No se encontraron empleados con las propiedades especificadas");
+                logError(logger, "No se encontro la lista con id %s", assignExpression->list->employeeId);
                 exit(1);
             }
             employees = aux->employees;
@@ -698,7 +679,7 @@ static TEmployee *searchEmployeesInState(Attributes *attributes) {
         if (state->employees[i] != NULL && hasAttributes(state->employees[i], attributes)) {
             TEmployee *temp = (TEmployee *) realloc(employees, (i + 1) * sizeof(TEmployee));
             if (temp == NULL) {
-                logError(logger, "No more memory available7");
+                logError(logger, "No hay mas memoria disponible");
                 free(employees);
                 return NULL;
             }
@@ -721,48 +702,54 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
     switch (relationshipExpression->list->listType) {
         case LIST_PROPERTIES:
             employees = searchEmployeesInState(relationshipExpression->list->attributes);
+            if (employees == NULL) {
+                logError(logger, "No se encontraron empleados con las propiedades especificadas");
+                exit(1);
+            }
             break;
         case LIST_ELEMENTS:
             for (int i = 0; i < relationshipExpression->list->elements->count; i++) {
-                printf("%d",relationshipExpression->list->elements->count);
-                printf("\n%s\n",relationshipExpression->list->elements->ids[i]);
                 TEmployee employeeAux = getEmployeeFromState(relationshipExpression->list->elements->ids[i]);
-                size = concatenateEmployees(employees, &employeeAux, size, 1);
+                if (employeeAux == NULL) {
+                    logError(logger, "No se encontro el empleado con id %s", relationshipExpression->list->elements->ids[i]);
+                    exit(1);
+                }
+                size = concatenateEmployees(&employees, &employeeAux, size, 1);
             }
             break;
         case LIST_EMPLOYEE:
             list = getListFromState(relationshipExpression->list->employeeId);
             if (list == NULL) {
-                logError(logger, "No se encontraron empleados con las propiedades especificadas");
+                logError(logger, "No se encontro la lista con id %s", relationshipExpression->list->employeeId);
                 exit(1);
             }
             employees = list->employees;
-
             break;
     }
 
     if (employees == NULL || employees[0] == NULL) {
-        logError(logger, "No se encontraron empleados con las propiedades especificadas");
+        logError(logger, "No se encontraron empleados");
         exit(1);
     }
 
     TEmployee *employeesInRelationship = NULL;
-    size = 0;
+    size_t size2 = 0;
     int aux = sizeof(employees) / sizeof(employees[0]);
 
     switch (relationshipExpression->relationship->relationshipType) {
         case RELATIONSHIP_CHILD_AND_SELF:
 
             for (int i = 0; i < aux; i++) {
-                size = concatenateEmployees(employeesInRelationship, &employees[i], size, 1);
-                size = concatenateEmployees(employeesInRelationship, employees[i]->children, size,
+                size2 = concatenateEmployees(&employeesInRelationship, &employees[i], size2, 1);
+                size2 = concatenateEmployees(&employeesInRelationship, employees[i]->children, size2,
                                             employees[i]->childrenSize);
             }
             break;
         case RELATIONSHIP_CHILD:
-            for (int i = 0; i < aux; i++)
-                size = concatenateEmployees(employeesInRelationship, employees[i]->children, size,
+            for (int i = 0; i < aux; i++) {
+                size2 = concatenateEmployees(&employeesInRelationship, employees[i]->children, size2,
                                             employees[i]->childrenSize);
+            }
             break;
 
         case RELATIONSHIP_SIBLING:
@@ -770,14 +757,19 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
                 if (employees[i] != NULL) {
                     for (int j = 0; employees[i]->bossesSize; j++) {
                         if (employees[i]->bosses[j] != NULL) {
-                            size = concatenateEmployees(employeesInRelationship, employees[i]->bosses[j]->children,
-                                                        size,
+                            size2 = concatenateEmployees(&employeesInRelationship, employees[i]->bosses[j]->children,
+                                                        size2,
                                                         employees[i]->bosses[j]->childrenSize);
                         }
                     }
                 }
             }
             break;
+    }
+
+    if (employeesInRelationship == NULL || employeesInRelationship[0] == NULL) {
+        logError(logger, "No se encontraron empleados en la relacion");
+        exit(1);
     }
 
     TEmployee *bosses = NULL;
@@ -803,18 +795,23 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
         case LIST_ELEMENTS:
             for (int i = 0; i < relationshipExpression->hierarchy->list->elements->count; i++) {
                 TEmployee employeeAux = getEmployeeFromState(relationshipExpression->hierarchy->list->elements->ids[i]);
-                bossesSize = concatenateEmployees(bosses, &employeeAux, bossesSize, 1);
+                if (employeeAux == NULL) {
+                    logError(logger, "No se encontro el empleado con id %s",
+                             relationshipExpression->hierarchy->list->elements->ids[i]);
+                    exit(1);
+                }
+                bossesSize = concatenateEmployees(&bosses, &employeeAux, bossesSize, 1);
             }
             break;
     }
 
     if (bosses == NULL || bosses[0] == NULL) {
-        logError(logger, "No se encontraron empleados con las propiedades especificadas");
+        logError(logger, "No se encontraron empleados");
         exit(1);
     }
     aux = sizeof(bosses) / sizeof(bosses[0]);
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size2; i++) {
         for (int j = 0; j < aux; j++) {
             addBoss(employeesInRelationship[i], bosses[j]);
             addChild(bosses[j], employeesInRelationship[i]);
@@ -834,7 +831,7 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
 
     TEmployee *temp = (TEmployee *) realloc(state->employees, (state->sizeEmployees + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available8");
+        logError(logger, "No hay mas memoria disponible");
         free(state->employees);
         exit(-1);
     }
@@ -856,8 +853,6 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
     employee->bosses = NULL;
     employee->bossesCount = 0;
     employee->bossesSize = 0;
-
-    logInformation(logger, "agregnado properties");
     generateProperties(employee, properties);
 
     state->employees[state->sizeEmployees - 1] = employee;
@@ -868,7 +863,7 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
 static TEmployeeList newList(char *id, TEmployee *employees) {
     TEmployeeList *temp = (TEmployeeList *) realloc(state->lists, (state->sizeLists + 1) * sizeof(TEmployeeList));
     if (temp == NULL) {
-        logError(logger, "No more memory available9");
+        logError(logger, "No hay mas memoria disponible");
         free(state->lists);
         exit(2);
     }

@@ -125,14 +125,14 @@ function visualizeData(data) {
         .attr("width", (d) => Math.max(100, (d.id || "").length * 10))
         .attr("height", (d) => {
             const numProperties = Object.keys(d).filter(
-                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
+                (key) => !["x", "y", "vx", "vy"].includes(key)
             ).length;
             return 20 + 15 * numProperties; // Adjust height based on the number of properties
         })
         .attr("x", (d) => -Math.max(100, (d.id || "").length * 10) / 2)
         .attr("y", (d) => {
             const numProperties = Object.keys(d).filter(
-                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
+                (key) => !["x", "y", "vx", "vy"].includes(key)
             ).length;
             return -10 - (15 * (numProperties - 1)) / 2;
         })
@@ -152,10 +152,18 @@ function visualizeData(data) {
         .text(""); // Remove the text content assignment
 
     node
+        .append("text")
+        .attr("dy", -15) // Adjust as needed
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px") // Adjust font size here
+        .style("fill", "#fff")
+        .text((d) => d.id); // Display the 'id' field of the node
+
+    node
         .selectAll("text.prop")
         .data((d) => {
             const properties = Object.keys(d)
-                .filter((key) => !["id", "x", "y", "vx", "vy", "index"].includes(key))
+                .filter((key) => !["x", "y", "vx", "vy", "index"].includes(key))
                 .map((key) => ({key, value: d[key]}));
             return properties.map((prop, i) => ({...prop, yOffset: i * 15}));
         })
@@ -166,7 +174,9 @@ function visualizeData(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "10px")
         .style("fill", "#fff")
-        .text(d => `${d.key.charAt(0).toUpperCase() + d.key.slice(1)}: ${d.value}`);
+        .text(
+            (d) => `${d.key.charAt(0).toUpperCase() + d.key.slice(1)}: ${d.value}`
+        );
 
     simulation.on("tick", () => {
         link.attr(

@@ -78,11 +78,11 @@ static void addBoss(TEmployee employee, TEmployee boss) {
     if (temp == NULL) {
         logError(logger, "No more memory available1");
         free(employee->bosses);
-        return;
+        exit(1);
     }
     if(boss == NULL){
         logError(logger, "No se puede agregar un jefe nulo");
-        return;
+        exit(1);
     }
     employee->bosses = temp;
     employee->bosses[employee->bossesCount] = boss;
@@ -233,7 +233,7 @@ static TEmployee getRoot(TEmployee employee) {
 static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmployee *employees, int *size) {
     if(employee == NULL){
         logError(logger, "No se puede buscar empleados nulos");
-        return;
+        exit(1);
     }
     if (isPresent(employee, employees))
         return;
@@ -359,7 +359,7 @@ static void generateJson() {
     file = fopen("output.json", "w");
     if (file == NULL) {
         logError(logger, "No se pudo abrir el archivo de salida");
-        return;
+        exit(1);
     }
 
     fprintf(file, "{\n");
@@ -418,12 +418,12 @@ static void generateProgram(Program *program) {
 
     if (state == NULL) {
         logError(logger, "No hay mas memoria disponible");
-        return;
+        exit(1);
     }
 
     if (program == NULL) {
         logError(logger, "No se puede generar un programa nulo");
-        return;
+        exit(1);
     }
 
     generateExpressions(program->expressions);
@@ -434,7 +434,7 @@ static void generateProgram(Program *program) {
 static void generateExpressions(Expressions *expressions) {
     if(expressions == NULL){
         logError(logger, "No se puede generar expresiones nulas");
-        return;
+        exit(1);
     }
     for (int i = 0; i < expressions->count; i++) {
         generateExpression(expressions->expressions[i]);
@@ -445,7 +445,7 @@ static void generateExpressions(Expressions *expressions) {
 static void generateExpression(Expression *expression) {
     if(expression == NULL){
         logError(logger, "No se puede generar una expresion nula");
-        return;
+        exit(1);
     }
 
     switch (expression->type) {
@@ -479,7 +479,7 @@ static void generateExpression(Expression *expression) {
 static void generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
     if(variableEmployeeExpression == NULL){
         logError(logger, "No se puede generar una expresion de empleado nula");
-        return;
+        exit(1);
     }
     newEmployee(variableEmployeeExpression->employeeId, variableEmployeeExpression->properties);
 }
@@ -487,7 +487,7 @@ static void generateVariableEmployeeExpression(VariableEmployeeExpression *varia
 static void generateProperties(TEmployee employee, Properties *properties) {
     if(employee == NULL){
         logError(logger, "No se puede agregar propiedades a un empleado nulo");
-        return;
+        exit(1);
     }
     if (properties != NULL) {
         logInformation(logger, "Generating properties...");
@@ -499,7 +499,7 @@ static void generateProperties(TEmployee employee, Properties *properties) {
 static void generateAttributes(TEmployee employee, Attributes *attributes) {
     if(attributes == NULL){
         logError(logger, "No se puede generar atributos nulos");
-        return;
+        exit(1);
     }
     for (int i = 0; i < attributes->count; i++)
         generateAttribute(employee, attributes->attributes[i]);
@@ -508,7 +508,7 @@ static void generateAttributes(TEmployee employee, Attributes *attributes) {
 static void generateAttribute(TEmployee employee, Attribute *attribute) {
     if(attribute == NULL){
         logError(logger, "No se puede agregar un atributo nulo");
-        return;
+        exit(1);
     }
 
     Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
@@ -540,7 +540,7 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
 static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
     if(employeeExpression == NULL){
         logError(logger, "No se puede generar una expresion de empleado nula");
-        return;
+        exit(1);
     }
     TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
     TEmployeeList list;
@@ -551,7 +551,7 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
         employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
         if (employee == NULL) {
             logError(logger, "No se pudo crear el empleado con id %s", employeeExpression->employeeId);
-            return;
+            exit(1);
         }
     } else {
         logInformation(logger, "Agregando propiedades al empleado con id %s", employeeExpression->employeeId);
@@ -564,7 +564,7 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
             TEmployee *employees = searchEmployeesInState(employeeExpression->list->attributes);
             if (employees == NULL || employees[0] == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
-                return;
+                exit(1);
             }
 
             int size = sizeof(employees) / sizeof(employees[0]);
@@ -596,7 +596,7 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
             list = getListFromState(employeeExpression->list->employeeId);
             if (list == NULL) {
                 logError(logger, "No se encontro la lista con id %s", employeeExpression->list->employeeId);
-                return;
+                exit(1);
             }
             for (int i = 0; i < list->employeesSize; i++) {
                 if(list->employees[i] != NULL) {
@@ -611,12 +611,12 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
 static void generateReplaceExpression(ReplaceExpression *replaceExpression) {
     if(replaceExpression==NULL){
         logError(logger, "No se puede generar una expresion de reemplazo nula");
-        return;
+        exit(1);
     }
     TEmployee old = getEmployeeFromState(replaceExpression->idToReplace);
     if (old == NULL) {
         logError(logger, "No se encontro el empleado con id %s", replaceExpression->idToReplace);
-        return;
+        exit(1);
     }
 
     TEmployee new;
@@ -624,13 +624,13 @@ static void generateReplaceExpression(ReplaceExpression *replaceExpression) {
         new = newEmployee(replaceExpression->idToReplaceWith, replaceExpression->properties);
         if (new == NULL) {
             logError(logger, "No se pudo crear el empleado con id %s", replaceExpression->idToReplaceWith);
-            return;
+            exit(1);
         }
     } else {
         new = getEmployeeFromState(replaceExpression->idToReplaceWith);
         if (new == NULL) {
             logError(logger, "No se encontro el empleado con id %s", replaceExpression->idToReplaceWith);
-            return;
+            exit(1);
         }
     }
 
@@ -640,7 +640,7 @@ static void generateReplaceExpression(ReplaceExpression *replaceExpression) {
 static void generateAssignExpression(AssignExpression *assignExpression) {
     if(assignExpression==NULL){
         logError(logger, "No se puede generar una expresion de asignacion nula");
-        return;
+        exit(1);
     }
     TEmployee *employees = NULL;
     TEmployeeList aux;
@@ -715,7 +715,7 @@ static TEmployee *searchEmployeesInState(Attributes *attributes) {
 static void generateRelationshipExpression(RelationshipExpression *relationshipExpression) {
     if(relationshipExpression==NULL){
         logError(logger, "No se puede generar una expresion de relacion nula");
-        return;
+        exit(1);
     }
     TEmployee *employees = NULL;
     TEmployeeList list = NULL;
@@ -737,7 +737,7 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             list = getListFromState(relationshipExpression->list->employeeId);
             if (list == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
-                return;
+                exit(1);
             }
             employees = list->employees;
 
@@ -746,7 +746,7 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
 
     if (employees == NULL || employees[0] == NULL) {
         logError(logger, "No se encontraron empleados con las propiedades especificadas");
-        return;
+        exit(1);
     }
 
     TEmployee *employeesInRelationship = NULL;
@@ -792,14 +792,14 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             bosses = searchEmployeesInState(relationshipExpression->hierarchy->list->attributes);
             if (bosses == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
-                return;
+                exit(1);
             }
             break;
         case LIST_EMPLOYEE:
             bossesList = getListFromState(relationshipExpression->hierarchy->list->employeeId);
             if (bossesList == NULL) {
                 logError(logger, "No se encontro la lista con id %s", relationshipExpression->hierarchy->list->employeeId);
-                return;
+                exit(1);
             }
             bosses = bossesList->employees;
             break;
@@ -813,7 +813,7 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
 
     if (bosses == NULL || bosses[0] == NULL) {
         logError(logger, "No se encontraron empleados con las propiedades especificadas");
-        return;
+        exit(1);
     }
     aux = sizeof(bosses) / sizeof(bosses[0]);
 

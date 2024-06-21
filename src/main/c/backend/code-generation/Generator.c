@@ -67,7 +67,7 @@ static bool hasAttributes(TEmployee employee, Attributes *attributes);
 static bool hasAttribute(TEmployee employee, Attribute *attribute);
 static bool isPresent(TEmployee employee, TEmployee *employees);
 
-static size_t concatenateEmployees(TEmployee **employees1, TEmployee *employees2, size_t size1, size_t size2);
+static TEmployee * concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2);
 
 
 static TEmployeeList getListFromState(char *id);
@@ -318,24 +318,23 @@ static bool isPresent(TEmployee employee, TEmployee *employees) {
     return false;
 }
 
-static size_t concatenateEmployees(TEmployee **employees1, TEmployee *employees2, size_t size1, size_t size2) {
-    TEmployee *temp = (TEmployee *) realloc(*employees1, (size1 + size2) * sizeof(TEmployee));
-    if (temp == NULL) {
+static TEmployee *concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2) {
+    TEmployee *employees = (TEmployee *) malloc((size1 + size2) * sizeof(TEmployee));
+    if (employees == NULL) {
         logError(logger, "No hay mas memoria disponible");
-        if (*employees1 != NULL)
-            free(*employees1);
         exit(-1);
     }
-    *employees1 = temp;
-    int j = 0;
-    for (size_t i = 0; i < size2; i++) {
-        if (employees2[i] != NULL && !isPresent(employees2[i], *employees1)) {
-            logInformation(logger, "employee %s", employees2[i]->employeeId);
-            (*employees1)[size1 + j] = employees2[i];
-            j++;
-        }
+
+    for (size_t i = 0; i < size1; i++) {
+        if (employees1[i] != NULL)
+            employees[i] = employees1[i];
     }
-    return size1 + j;
+    for (size_t i = 0; i < size2; i++) {
+        if (employees2[i] != NULL && !isPresent(employees2[i], employees))
+            employees[size1 + i] = employees2[i];
+    }
+
+    return employees;
 }
 
 static TEmployeeList getListFromState(char *id) {
@@ -636,7 +635,8 @@ static void generateAssignExpression(AssignExpression *assignExpression) {
                     logError(logger, "No se encontro el empleado con id %s", assignExpression->list->elements->ids[i]);
                     exit(1);
                 }
-                size = concatenateEmployees(&employees, &employeeAux, size, 1);
+                employees = concatenateEmployees(employees, &employeeAux, size, 1);
+                size++;
             }
             break;
         case LIST_EMPLOYEE:
@@ -714,7 +714,8 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
                     logError(logger, "No se encontro el empleado con id %s", relationshipExpression->list->elements->ids[i]);
                     exit(1);
                 }
-                size = concatenateEmployees(&employees, &employeeAux, size, 1);
+                employees = concatenateEmployees(employees, &employeeAux, size, 1);
+                size++;
             }
             break;
         case LIST_EMPLOYEE:
@@ -738,28 +739,30 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
 
     switch (relationshipExpression->relationship->relationshipType) {
         case RELATIONSHIP_CHILD_AND_SELF:
-
             for (int i = 0; i < aux; i++) {
-                size2 = concatenateEmployees(&employeesInRelationship, &employees[i], size2, 1);
-                size2 = concatenateEmployees(&employeesInRelationship, employees[i]->children, size2,
+                employeesInRelationship = concatenateEmployees(employeesInRelationship, &employees[i], size2, 1);
+                size2++;
+                employeesInRelationship = concatenateEmployees(employeesInRelationship, employees[i]->children, size2,
                                             employees[i]->childrenSize);
+                size2 += employees[i]->childrenSize;
             }
             break;
         case RELATIONSHIP_CHILD:
             for (int i = 0; i < aux; i++) {
-                size2 = concatenateEmployees(&employeesInRelationship, employees[i]->children, size2,
+                employeesInRelationship = concatenateEmployees(employeesInRelationship, employees[i]->children, size2,
                                             employees[i]->childrenSize);
+                size2 += employees[i]->childrenSize;
             }
             break;
-
         case RELATIONSHIP_SIBLING:
             for (int i = 0; i < aux; i++) {
-                if (employees[i] != NULL) {
-                    for (int j = 0; employees[i]->bossesSize; j++) {
-                        if (employees[i]->bosses[j] != NULL) {
-                            size2 = concatenateEmployees(&employeesInRelationship, employees[i]->bosses[j]->children,
+                if (employees[i] != NULL && employees[i]->bosses != NULL) {
+                    for (int j = 0; j < employees[i]->bossesSize; j++) {
+                        if (employees[i]->bosses[j] != NULL && employees[i]->bosses[j]->children != NULL) {
+                            employeesInRelationship = concatenateEmployees(employeesInRelationship, employees[i]->bosses[j]->children,
                                                         size2,
                                                         employees[i]->bosses[j]->childrenSize);
+                            size2 += employees[i]->bosses[j]->childrenSize - 1;
                         }
                     }
                 }
@@ -800,7 +803,8 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
                              relationshipExpression->hierarchy->list->elements->ids[i]);
                     exit(1);
                 }
-                bossesSize = concatenateEmployees(&bosses, &employeeAux, bossesSize, 1);
+                bosses = concatenateEmployees(bosses, &employeeAux, bossesSize, 1);
+                bossesSize++;
             }
             break;
     }

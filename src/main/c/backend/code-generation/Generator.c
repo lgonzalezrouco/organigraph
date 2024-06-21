@@ -975,10 +975,6 @@ static TEmployee getEmployeeFromState(char *employeeId) {
 
 void generate(CompilerState *compilerState) {
     logDebugging(logger, "Generating final output...");
-    file = fopen("project.json", "w");
-    // generatePrologue();
-
     generateProgram(compilerState->abstractSyntaxtTree);
-    // generateEpilogue();
     logDebugging(logger, "Generation is done.");
 }

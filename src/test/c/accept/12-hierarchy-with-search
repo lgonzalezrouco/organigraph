@@ -7,7 +7,7 @@ employee e {
     role: "junior developer"
 };
 employee juan {
-    name: "Martin Gonzalez",
+    name: "Marcos",
     role: "junior developer"
 };
 employee marcos {

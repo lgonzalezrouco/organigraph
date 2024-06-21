@@ -127,7 +127,6 @@ properties: OPEN_BRACKET attributes CLOSE_BRACKET					{ $$ = PropertiesSemanticA
 	;
 
 hierarchy: UNDER list												{ $$ = HierarchySemanticAction($2); }
-	| 																{ $$ = HierarchySemanticAction(NULL); }
 	;
 
 employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET		{ $$ = EmployeesSemanticAction($2); }

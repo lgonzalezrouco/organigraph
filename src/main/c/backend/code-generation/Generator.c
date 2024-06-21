@@ -45,11 +45,6 @@ static void generateReplaceExpression(ReplaceExpression *replaceExpression);
 static void generateAssignExpression(AssignExpression *assignExpression);
 static void generateRelationshipExpression(RelationshipExpression *relationshipExpression);
 
-static void generatePrologue(void);
-static void generateEpilogue();
-static char *myIndentation(unsigned int indentationLevel);
-static void output(unsigned int indentationLevel, const char *format, ...);
-
 static void addBoss(TEmployee employee, TEmployee boss);
 static void addChild(TEmployee employee, TEmployee child);
 
@@ -74,7 +69,6 @@ static bool isPresent(TEmployee employee, TEmployee *employees);
 
 static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2);
 
-static void fireEmployee(TEmployee employee);
 
 static TEmployeeList getListFromState(char *id);
 static TEmployeeList newList(char *id, TEmployee *employees);
@@ -341,7 +335,6 @@ static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2,
         if (employees2[i] != NULL && !isPresent(employees2[i], employees1)) {
             if (temp == NULL) {
                 logError(logger, "No more memory available5");
-                // free(employees1);
                 return -1;
             }
             employees1 = temp;
@@ -390,10 +383,8 @@ static void generateJson() {
                             state->employees[i]->metadata[j].numValue);
                 }
             }
-            // delete the last comma
             fseek(file, -1, SEEK_CUR);
 
-            // if is the last employee the comma should go
             if (i == state->sizeEmployees - 1)
                 fprintf(file, " }\n");
             else
@@ -414,7 +405,6 @@ static void generateJson() {
         }
     }
 
-    // delete the last comma
     fseek(file, -2, SEEK_CUR);
     fprintf(file, "\n\t]\n");
     fprintf(file, "}\n");
@@ -422,9 +412,7 @@ static void generateJson() {
     fclose(file);
 }
 
-/**
- * Generates the output of the program.
- */
+
 static void generateProgram(Program *program) {
     state = (GeneratorState *) calloc(1, sizeof(GeneratorState));
 
@@ -453,9 +441,7 @@ static void generateExpressions(Expressions *expressions) {
     }
 }
 
-/**
- * Generates the output of an expression.
- */
+
 static void generateExpression(Expression *expression) {
     if(expression == NULL){
         logError(logger, "No se puede generar una expresion nula");
@@ -837,58 +823,6 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             addChild(bosses[j], employeesInRelationship[i]);
         }
     }
-}
-
-// Destruye al nodo empleado
-static void fireEmployee(TEmployee employee) {
-    if (employee != NULL) {
-        removeEmployee(employee);
-        for (int i = 0; i < state->sizeEmployees; i++) {
-            if (state->employees[i] == employee) {
-                state->employees[i] = NULL;
-            }
-        }
-        free(employee);
-    }
-}
-
-/**
- * Creates the prologue of the generated output, a Latex document that renders
- * a tree thanks to the Forest package.
- *
- * @see https://ctan.dcc.uchile.cl/graphics/pgf/contrib/forest/forest-doc.pdf
- */
-static void generatePrologue(void) {
-    fprintf(file, "%s", "{ \"nodes\": [");
-}
-
-/**
- * Creates the epilogue of the generated output, that is, the final lines that
- * completes a valid Latex document.
- */
-static void generateEpilogue() {
-    fprintf(file, "%s", "] }\n");
-}
-
-/**
- * Generates an myIndentation string for the specified level.
- */
-static char *myIndentation(const unsigned int level) {
-    return indentation(indentationCharacter, level, indentationSize);
-}
-
-/**
- * Outputs a formatted string to standard output.
- */
-static void output(const unsigned int indentationLevel, const char *const format, ...) {
-    va_list arguments;
-    va_start(arguments, format);
-    char *indentation = myIndentation(indentationLevel);
-    char *effectiveFormat = concatenate(2, indentation, format);
-    vfprintf(stdout, effectiveFormat, arguments);
-    free(effectiveFormat);
-    free(indentation);
-    va_end(arguments);
 }
 
 static TEmployee newEmployee(char *employeeId, Properties *properties) {

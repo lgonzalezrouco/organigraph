@@ -69,7 +69,7 @@ struct VariableEmployeeExpression {
 
 struct EmployeeExpression {
     char* employeeId;
-    Hierarchy* hierarchy;
+    List* list;
     Properties* properties;
 };
 
@@ -144,7 +144,7 @@ struct Employees {
 
 struct List {
     union {
-        Properties* properties;
+        Attributes * attributes;
         char* employeeId;
         Elements* elements;
     };

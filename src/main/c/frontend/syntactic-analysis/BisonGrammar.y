@@ -106,8 +106,8 @@ expressions: expressions expression SEMICOLON						{ $$ = AppendExpressionSemant
 	;
 
 expression: EMPLOYEE ID properties									{ $$ = VariableEmployeeExpressionSemanticAction($2, $3); }	
-	| EMPLOYEE ID hierarchy properties								{ $$ = EmployeeExpressionSemanticAction($2, $3, $4); }
-	| ID hierarchy properties										{ $$ = EmployeeExpressionSemanticAction($1, $2, $3); }
+	| EMPLOYEE ID UNDER list properties								{ $$ = EmployeeExpressionSemanticAction($2, $4, $5); }
+	| ID UNDER list properties										{ $$ = EmployeeExpressionSemanticAction($1, $3, $4); }
 	| REMOVE ID														{ $$ = RemoveExpressionSemanticAction($2); }
 	| REPLACE ID WITH ID properties									{ $$ = ReplaceExpressionSemanticAction($2, $4, $5); }
 	| employees ASSIGN list											{ $$ = AssignExpressionSemanticAction($1, $3); }
@@ -134,8 +134,8 @@ employees: EMPLOYEE ID OPEN_SQUARE_BRACKET CLOSE_SQUARE_BRACKET		{ $$ = Employee
 	| ID															{ $$ = VariableEmployeesSemanticAction($1); }
 	;
 
-list: OPEN_PARENTHESIS SEARCH properties CLOSE_PARENTHESIS			{ $$ = ListSemanticAction($3); }
-	| SEARCH properties												{ $$ = ListSemanticAction($2); }
+list: OPEN_PARENTHESIS SEARCH OPEN_BRACKET attributes CLOSE_BRACKET CLOSE_PARENTHESIS			{ $$ = ListSemanticAction($4); }
+	| SEARCH OPEN_BRACKET attributes CLOSE_BRACKET												{ $$ = ListSemanticAction($3); }
 	| ID															{ $$ = VariableListSemanticAction($1); }
 	| OPEN_BRACKET elements CLOSE_BRACKET							{ $$ = ElementsListSemanticAction($2); }
 	;

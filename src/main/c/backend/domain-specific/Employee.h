@@ -34,5 +34,7 @@ typedef struct EmployeeList{
 	char *id;
 } EmployeeList;
 
+typedef Employee *TEmployee;
+typedef EmployeeList *TEmployeeList;
 
 #endif

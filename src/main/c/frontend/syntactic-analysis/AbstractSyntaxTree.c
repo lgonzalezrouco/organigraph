@@ -25,7 +25,7 @@ void releaseEmployeeExpression(EmployeeExpression* employeeExpression) {
     logDebugging(_logger, "Executing destructor: %s", __FUNCTION__);
     if (employeeExpression != NULL) {
         free(employeeExpression->employeeId);
-        releaseHierarchy(employeeExpression->hierarchy);
+        releaseList(employeeExpression->list);
         releaseProperties(employeeExpression->properties);
         free(employeeExpression);
     }
@@ -160,7 +160,7 @@ void releaseList(List* list) {
     if (list != NULL) {
         switch (list->listType) {
             case LIST_PROPERTIES:
-                releaseProperties(list->properties);
+                releaseAttributes(list->attributes);
                 break;
             case LIST_EMPLOYEE:
                 free(list->employeeId);

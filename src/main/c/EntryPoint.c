@@ -1,4 +1,4 @@
-// #include "backend/code-generation/Generator.h"
+#include "backend/code-generation/Generator.h"
 // #include "backend/domain-specific/Calculator.h"
 // #include "backend/domain-specific/Project.h"
 #include "frontend/lexical-analysis/FlexActions.h"
@@ -20,7 +20,7 @@ const int main(const int count, const char ** arguments) {
 	initializeSyntacticAnalyzerModule();
 	initializeAbstractSyntaxTreeModule();
 	// initializeCalculatorModule();
-	// initializeGeneratorModule();
+	initializeGeneratorModule();
 
 	// Logs the arguments of the application.
 	for (int k = 0; k < count; ++k) {
@@ -32,8 +32,6 @@ const int main(const int count, const char ** arguments) {
 		.abstractSyntaxtTree = NULL,
 		.succeed = false,
 		.value = 0,
-        .symbolTable = createSymbolTable(),
-        .scopesStack = newStack()
 	};
 	const SyntacticAnalysisStatus syntacticAnalysisStatus = parse(&compilerState);
 	CompilationStatus compilationStatus = SUCCEED;
@@ -51,6 +49,9 @@ const int main(const int count, const char ** arguments) {
 		}
 		logDebugging(logger, "Releasing AST resources...");
 		releaseProgram(program); */
+        generate(&compilerState);
+        logDebugging(logger, "Releasing AST resources...");
+        releaseProgram(program);
 	}
 	else {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");
@@ -58,7 +59,7 @@ const int main(const int count, const char ** arguments) {
 	}
 
 	logDebugging(logger, "Releasing modules resources...");
-	// shutdownGeneratorModule();
+	shutdownGeneratorModule();
 	// shutdownCalculatorModule();
 	shutdownAbstractSyntaxTreeModule();
 	shutdownSyntacticAnalyzerModule();

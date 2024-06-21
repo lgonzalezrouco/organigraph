@@ -23,7 +23,7 @@ Program* ExpressionsProgramSemanticAction(CompilerState* compilerState, Expressi
 Expressions* AppendExpressionSemanticAction(Expressions* expressions, Expression* expression);
 Expressions* ExpressionSemanticAction(Expression* expression);
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties);
-Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy, Properties* properties);
+Expression* EmployeeExpressionSemanticAction(char* employeeId, List* list, Properties* properties);
 Expression* RemoveExpressionSemanticAction(char* idToRemove);
 Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* idToReplaceWith, Properties* properties);
 Expression* AssignExpressionSemanticAction(Employees* employees, List* list);
@@ -36,7 +36,7 @@ Properties* PropertiesSemanticAction(Attributes* attributes);
 Hierarchy* HierarchySemanticAction(List* list);
 Employees* EmployeesSemanticAction(char* employeeId);
 Employees* VariableEmployeesSemanticAction(char* employeeId);
-List* ListSemanticAction(Properties* properties);
+List* ListSemanticAction(Attributes * attributes);
 List* VariableListSemanticAction(char* employeesId);
 List* ElementsListSemanticAction(Elements* elements);
 Elements* AppendElementsSemanticAction(Elements* elements, char* employeeId);

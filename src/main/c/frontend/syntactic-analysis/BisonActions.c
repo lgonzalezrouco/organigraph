@@ -71,14 +71,14 @@ Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Propertie
     return expression;
 }
 
-Expression* EmployeeExpressionSemanticAction(char* employeeId, Hierarchy* hierarchy,
+Expression* EmployeeExpressionSemanticAction(char* employeeId, List* list,
                                              Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = EMPLOYEE_EXPRESSION;
     expression->employeeExpression = calloc(1, sizeof(EmployeeExpression));
     expression->employeeExpression->employeeId = employeeId;
-    expression->employeeExpression->hierarchy = hierarchy;
+    expression->employeeExpression->list = list;
     expression->employeeExpression->properties = properties;
     return expression;
 }
@@ -192,11 +192,11 @@ Employees* VariableEmployeesSemanticAction(char* employeeId) {
     return employees;
 }
 
-List* ListSemanticAction(Properties* properties) {
+List* ListSemanticAction(Attributes * attributes) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     List* list = calloc(1, sizeof(List));
     list->listType = LIST_PROPERTIES;
-    list->properties = properties;
+    list->attributes = attributes;
     return list;
 }
 

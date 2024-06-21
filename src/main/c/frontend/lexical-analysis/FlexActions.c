@@ -3,7 +3,7 @@
 /* MODULE INTERNAL STATE */
 
 static Logger* _logger = NULL;
-static boolean _logIgnoredLexemes = true;
+static boolean _logIgnoredLexemes = false;
 
 void initializeFlexActionsModule() {
     _logIgnoredLexemes = getBooleanOrDefault("LOG_IGNORED_LEXEMES", _logIgnoredLexemes);
@@ -75,20 +75,6 @@ Token BracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext, Token 
     return bracket;
 }
 
-Token ProjectLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
-    _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token = PROJECT;
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
-}
-
-Token InLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
-    _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token = IN;
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
-}
-
 Token UnderLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
     Token token = UNDER;
@@ -117,12 +103,7 @@ Token RemoveLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
     return token;
 }
 
-Token FromLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext) {
-    _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);
-    Token token = FROM;
-    lexicalAnalyzerContext->semanticValue->token = token;
-    return token;
-}
+
 
 Token SquareBracketLexemeAction(LexicalAnalyzerContext* lexicalAnalyzerContext, Token squareBracket) {
     _logLexicalAnalyzerContext(__FUNCTION__, lexicalAnalyzerContext);

@@ -17,19 +17,16 @@ void shutdownAbstractSyntaxTreeModule();
 
 typedef enum RelationshipType RelationshipType;
 typedef enum ListType ListType;
-typedef enum DefineType DefineType;
 typedef enum AttributeType AttributeType;
 typedef enum ExpressionType ExpressionType;
+typedef enum EmployeesType EmployeesType;
 
-typedef struct ProjectExpression ProjectExpression;
 typedef struct VariableEmployeeExpression VariableEmployeeExpression;
 typedef struct EmployeeExpression EmployeeExpression;
 typedef struct RemoveExpression RemoveExpression;
 typedef struct ReplaceExpression ReplaceExpression;
 typedef struct AssignExpression AssignExpression;
 typedef struct RelationshipExpression RelationshipExpression;
-typedef struct ListRelationshipExpression ListRelationshipExpression;
-typedef struct ListExpression ListExpression;
 typedef struct Expressions Expressions;
 typedef struct Expression Expression;
 typedef struct Program Program;
@@ -37,7 +34,6 @@ typedef struct Attribute Attribute;
 typedef struct Attributes Attributes;
 typedef struct Properties Properties;
 typedef struct Hierarchy Hierarchy;
-typedef struct Define Define;
 typedef struct Employees Employees;
 typedef struct List List;
 typedef struct Elements Elements;
@@ -51,25 +47,20 @@ enum RelationshipType { RELATIONSHIP_CHILD, RELATIONSHIP_SIBLING, RELATIONSHIP_C
 
 enum ListType { LIST_PROPERTIES, LIST_EMPLOYEE, LIST_ELEMENTS };
 
-enum DefineType { DEFINE_EMPLOYEE, DEFINE_PROPERTIES };
-
 enum AttributeType { ATTRIBUTE_STRING, ATTRIBUTE_INTEGER };
 
+enum EmployeesType { LIST, VARIABLE };
+
 enum ExpressionType {
-    PROJECT_EXPRESSION,
     VARIABLE_EMPLOYEE_EXPRESSION,
     EMPLOYEE_EXPRESSION,
     REMOVE_EXPRESSION,
     REPLACE_EXPRESSION,
     ASSIGN_EXPRESSION,
     RELATIONSHIP_EXPRESSION,
-    LIST_RELATIONSHIP_EXPRESSION,
-    LIST_EXPRESSION
 };
 
-struct ProjectExpression {
-    char* projectId;
-};
+
 
 struct VariableEmployeeExpression {
     char* employeeId;
@@ -78,20 +69,18 @@ struct VariableEmployeeExpression {
 
 struct EmployeeExpression {
     char* employeeId;
-    char* projectId;
-    Hierarchy* hierarchy;
+    List* list;
     Properties* properties;
 };
 
 struct RemoveExpression {
     char* idToRemove;
-    char* projectId;
 };
 
 struct ReplaceExpression {
     char* idToReplace;
-    char* projectId;
-    Define* define;
+    char* idToReplaceWith;
+    Properties* properties;
 };
 
 struct AssignExpression {
@@ -102,31 +91,18 @@ struct AssignExpression {
 struct RelationshipExpression {
     List* list;
     Relationship* relationship;
-    char* projectId;
     Hierarchy* hierarchy;
-};
-
-struct ListRelationshipExpression {
-    List* list;
-    Relationship* relationship;
-};
-
-struct ListExpression {
-    List* list;
 };
 
 struct Expression {
     ExpressionType type;
     union {
-        ProjectExpression* projectExpression;
         VariableEmployeeExpression* variableEmployeeExpression;
         EmployeeExpression* employeeExpression;
         RemoveExpression* removeExpression;
         ReplaceExpression* replaceExpression;
         AssignExpression* assignExpression;
         RelationshipExpression* relationshipExpression;
-        ListRelationshipExpression* listRelationshipExpression;
-        ListExpression* listExpression;
     };
 };
 
@@ -161,24 +137,14 @@ struct Hierarchy {
     List* list;
 };
 
-struct Define {
-    union {
-        char* employeeId;
-        Properties* properties;
-    };
-    DefineType defineType;
-};
-
 struct Employees {
     char* employeesId;
+    EmployeesType employeesType;
 };
 
 struct List {
     union {
-        struct {
-            Properties* properties;
-            char* projectId;
-        };
+        Attributes * attributes;
         char* employeeId;
         Elements* elements;
     };
@@ -198,15 +164,12 @@ struct Relationship {
  * Node recursive destructors.
  */
 
-void releaseProjectExpression(ProjectExpression* projectExpression);
 void releaseVariableEmployeeExpression(VariableEmployeeExpression* variableEmployeeExpression);
 void releaseEmployeeExpression(EmployeeExpression* employeeExpression);
 void releaseRemoveExpression(RemoveExpression* removeExpression);
 void releaseReplaceExpression(ReplaceExpression* replaceExpression);
 void releaseAssignExpression(AssignExpression* assignExpression);
 void releaseRelationshipExpression(RelationshipExpression* relationshipExpression);
-void releaseListRelationshipExpression(ListRelationshipExpression* listRelationshipExpression);
-void releaseListExpression(ListExpression* listExpression);
 void releaseExpression(Expression* expression);
 void releaseExpressions(Expressions* expressions);
 void releaseProgram(Program* program);
@@ -214,7 +177,6 @@ void releaseAttribute(Attribute* attribute);
 void releaseAttributes(Attributes* attributes);
 void releaseProperties(Properties* properties);
 void releaseHierarchy(Hierarchy* hierarchy);
-void releaseDefine(Define* define);
 void releaseEmployees(Employees* employees);
 void releaseList(List* list);
 void releaseElements(Elements* elements);

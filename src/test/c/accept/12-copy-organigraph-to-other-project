@@ -1,9 +1,0 @@
-project mercadoLibre;
-
-employee empleado in mercadoLibre;
-
-employee empleado2 in mercadoLibre under empleado;
-
-project globant;
-
-empleado -> in globant;

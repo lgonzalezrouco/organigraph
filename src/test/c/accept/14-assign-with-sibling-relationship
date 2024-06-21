@@ -1,0 +1,30 @@
+employee empleado1;
+
+employee empleado5;
+
+employee empleado2 under {empleado5};
+employee empleado3 under {empleado5};
+employee empleado4 under {empleado5};
+employee empleado6 under {empleado5};
+employee empleado7 under {empleado5};
+employee empleado8 under {empleado5};
+employee empleado12 under {empleado5};
+employee empleado13 under {empleado5};
+employee empleado14 under {empleado5};
+employee empleado16 under {empleado5};
+employee empleado17 under {empleado5};
+employee empleado18 under {empleado5};
+employee empleado22 under {empleado5};
+employee empleado23 under {empleado5};
+employee empleado24 under {empleado5};
+employee empleado26 under {empleado5};
+employee empleado27 under {empleado5};
+employee empleado28 under {empleado5};
+employee empleado32 under {empleado5};
+employee empleado33 under {empleado5};
+employee empleado34 under {empleado5};
+employee empleado36 under {empleado5};
+employee empleado37 under {empleado5};
+employee empleado38 under {empleado5};
+
+{ empleado5,empleado2} == under {empleado1};

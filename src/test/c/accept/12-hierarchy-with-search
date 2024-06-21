@@ -1,1 +1,17 @@
-employee empleado2 in mercadoLibre under (search { name: "Marcos" } in MercadoLibre);
+employee empleado1 {
+    name: "Marcos",
+    role: "junior developer"
+};
+employee e {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee juan {
+    name: "Marcos",
+    role: "junior developer"
+};
+employee marcos {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee empleado2 under (search { name: "Marcos" });

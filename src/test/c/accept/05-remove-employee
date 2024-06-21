@@ -1,7 +1,6 @@
-project mercadoLibre;
 
-employee empleado in mercadoLibre;
+employee empleado;
 
-employee empleado2 in mercadoLibre under empleado;
+employee empleado2 under { empleado };
 
-remove empleado from mercadoLibre;
+remove empleado;

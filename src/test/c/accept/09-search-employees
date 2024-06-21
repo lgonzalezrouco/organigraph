@@ -1,1 +1,11 @@
-employee empleados1[] = search { name: "Tomas Rodriguez" } in MercadoLibre;
+employee empleado1 {
+    name: "Tomas Rodriguez",
+    role: "junior developer"
+};
+
+employee empleados1[] = search { name: "Tomas Rodriguez" };
+
+employee empleado2 under empleados1 {
+    name: "Juan Perez",
+    role: "senior developer"
+};

@@ -62,53 +62,43 @@ Expressions* ExpressionSemanticAction(Expression* expression) {
 	return expressions;
 }
 
-Expression* ProjectExpressionSemanticAction(char* projectId) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Expression* expression = calloc(1, sizeof(Expression));
-    expression->type = PROJECT_EXPRESSION;
-    expression->projectExpression = calloc(1, sizeof(ProjectExpression));
-    expression->projectExpression->projectId = projectId;
-    return expression;
-}
-
 Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = VARIABLE_EMPLOYEE_EXPRESSION;
-    expression->employeeExpression = calloc(1, sizeof(VariableEmployeeExpression));
-    expression->employeeExpression->employeeId = employeeId;
+    expression->variableEmployeeExpression = calloc(1, sizeof(struct VariableEmployeeExpression));
+    expression->variableEmployeeExpression->employeeId = employeeId;
+    expression->variableEmployeeExpression->properties = properties;
     return expression;
 }
 
-Expression* EmployeeExpressionSemanticAction(char* employeeId, char* projectId, Hierarchy* hierarchy,
+Expression* EmployeeExpressionSemanticAction(char* employeeId, List* list,
                                              Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = EMPLOYEE_EXPRESSION;
     expression->employeeExpression = calloc(1, sizeof(EmployeeExpression));
     expression->employeeExpression->employeeId = employeeId;
-    expression->employeeExpression->projectId = projectId;
-    expression->employeeExpression->hierarchy = hierarchy;
+    expression->employeeExpression->list = list;
     expression->employeeExpression->properties = properties;
     return expression;
 }
-Expression* RemoveExpressionSemanticAction(char* idToRemove, char* projectId) {
+Expression* RemoveExpressionSemanticAction(char* idToRemove) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = REMOVE_EXPRESSION;
     expression->removeExpression = calloc(1, sizeof(RemoveExpression));
     expression->removeExpression->idToRemove = idToRemove;
-    expression->removeExpression->projectId = projectId;
     return expression;
 }
-Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* projectId, Define* define) {
+Expression* ReplaceExpressionSemanticAction(char* idToReplace, char* idToReplaceWith, Properties* properties) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = REPLACE_EXPRESSION;
     expression->replaceExpression = calloc(1, sizeof(ReplaceExpression));
     expression->replaceExpression->idToReplace = idToReplace;
-    expression->replaceExpression->projectId = projectId;
-    expression->replaceExpression->define = define;
+    expression->replaceExpression->idToReplaceWith = idToReplaceWith;
+    expression->replaceExpression->properties = properties;
     return expression;
 }
 Expression* AssignExpressionSemanticAction(Employees* employees, List* list) {
@@ -121,7 +111,7 @@ Expression* AssignExpressionSemanticAction(Employees* employees, List* list) {
     return expression;
 }
 
-Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, char* projectId,
+Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relationship, 
                                                  Hierarchy* hierarchy) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
@@ -129,26 +119,7 @@ Expression* RelationshipExpressionSemanticAction(List* list, Relationship* relat
     expression->relationshipExpression = calloc(1, sizeof(RelationshipExpression));
     expression->relationshipExpression->list = list;
     expression->relationshipExpression->relationship = relationship;
-    expression->relationshipExpression->projectId = projectId;
     expression->relationshipExpression->hierarchy = hierarchy;
-}
-
-Expression* ListRelationshipExpressionSemanticAction(List* list, Relationship* relationship) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Expression* expression = calloc(1, sizeof(Expression));
-    expression->type = LIST_RELATIONSHIP_EXPRESSION;
-    expression->listRelationshipExpression = calloc(1, sizeof(RelationshipExpression));
-    expression->listRelationshipExpression->list = list;
-    expression->listRelationshipExpression->relationship = relationship;
-    return expression;
-}
-
-Expression* ListExpressionSemanticAction(List* list) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Expression* expression = calloc(1, sizeof(Expression));
-    expression->type = LIST_EXPRESSION;
-    expression->listExpression = calloc(1, sizeof(ListExpression));
-    expression->listExpression->list = list;
     return expression;
 }
 
@@ -193,6 +164,8 @@ Attribute* IntegerMetadataSemanticAction(char* metadataId, int value) {
 
 Properties* PropertiesSemanticAction(Attributes* attributes) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
+    if (attributes == NULL)
+        return NULL;
     Properties* properties = calloc(1, sizeof(Properties));
     properties->attributes = attributes;
     return properties;
@@ -205,26 +178,11 @@ Hierarchy* HierarchySemanticAction(List* list) {
     return hierarchy;
 }
 
-Define* VariableDefineSemanticAction(char* employeeId) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Define* define = calloc(1, sizeof(Define));
-    define->defineType = DEFINE_EMPLOYEE;
-    define->employeeId = employeeId;
-    return define;
-}
-
-Define* PropertiesDefineSemanticAction(Properties* properties) {
-    _logSyntacticAnalyzerAction(__FUNCTION__);
-    Define* define = calloc(1, sizeof(Define));
-    define->defineType = DEFINE_PROPERTIES;
-    define->properties = properties;
-    return define;
-}
-
 Employees* EmployeesSemanticAction(char* employeeId) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Employees* employees = calloc(1, sizeof(Employees));
     employees->employeesId = employeeId;
+    employees->employeesType = LIST;
     return employees;
 }
 
@@ -232,15 +190,16 @@ Employees* VariableEmployeesSemanticAction(char* employeeId) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Employees* employees = calloc(1, sizeof(Employees));
     employees->employeesId = employeeId;
+    employees->employeesType = VARIABLE;
+
     return employees;
 }
 
-List* ListSemanticAction(Properties* properties, char* projectId) {
+List* ListSemanticAction(Attributes * attributes) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
     List* list = calloc(1, sizeof(List));
     list->listType = LIST_PROPERTIES;
-    list->properties = properties;
-    list->projectId = projectId;
+    list->attributes = attributes;
     return list;
 }
 

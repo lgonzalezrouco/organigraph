@@ -19,6 +19,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-static-libgcc)
     add_compile_options(-std=gnu99)
     add_compile_options(-O3)
+    # add_compile_options(-g)
 
     # Compiles the scanner with Flex.
     add_custom_command(
@@ -55,8 +56,6 @@ endif ()
 add_executable(Compiler
         src/main/c/backend/code-generation/Generator.c
         src/main/c/backend/domain-specific/Employee.c
-        # src/main/c/backend/semantic-analysis/SymbolTable.c
-        # src/main/c/backend/domain-specific/Calculator.c
         src/main/c/EntryPoint.c
         src/main/c/frontend/lexical-analysis/FlexActions.c
         src/main/c/frontend/lexical-analysis/FlexScanner.c
@@ -68,11 +67,10 @@ add_executable(Compiler
         src/main/c/shared/Environment.c
         src/main/c/shared/Logger.c
         src/main/c/shared/String.c
-        # src/main/c/backend/domain-specific/projectADT.c
-        # src/main/c/shared/stackADT.c
-        # Add more *.c files if needed (otherwise, they won't be compiled).
-        # ...
 )
+
+# target_compile_options(Compiler PRIVATE -fsanitize=address)
+# target_link_options(Compiler PRIVATE -fsanitize=address)
 
 # Link final project and libraries.
 target_link_libraries(Compiler)

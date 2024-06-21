@@ -66,8 +66,9 @@ Expression* VariableEmployeeExpressionSemanticAction(char* employeeId, Propertie
     _logSyntacticAnalyzerAction(__FUNCTION__);
     Expression* expression = calloc(1, sizeof(Expression));
     expression->type = VARIABLE_EMPLOYEE_EXPRESSION;
-    expression->employeeExpression = calloc(1, sizeof(VariableEmployeeExpression));
-    expression->employeeExpression->employeeId = employeeId;
+    expression->variableEmployeeExpression = calloc(1, sizeof(struct VariableEmployeeExpression));
+    expression->variableEmployeeExpression->employeeId = employeeId;
+    expression->variableEmployeeExpression->properties = properties;
     return expression;
 }
 
@@ -163,6 +164,8 @@ Attribute* IntegerMetadataSemanticAction(char* metadataId, int value) {
 
 Properties* PropertiesSemanticAction(Attributes* attributes) {
     _logSyntacticAnalyzerAction(__FUNCTION__);
+    if (attributes == NULL)
+        return NULL;
     Properties* properties = calloc(1, sizeof(Properties));
     properties->attributes = attributes;
     return properties;

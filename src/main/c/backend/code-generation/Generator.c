@@ -68,7 +68,6 @@ static TEmployee newEmployee(char *employeeId, Properties *properties);
 static TEmployee *searchEmployeesInState(Attributes *attributes);
 static TEmployee *searchEmployees(TEmployee root, Attributes *attributes);
 
-static bool hasProperties(TEmployee employee, Properties *properties);
 static bool hasAttributes(TEmployee employee, Attributes *attributes);
 static bool hasAttribute(TEmployee employee, Attribute *attribute);
 static bool isPresent(TEmployee employee, TEmployee *employees);
@@ -83,16 +82,11 @@ static TEmployeeList newList(char *id, TEmployee *employees);
 static void addBoss(TEmployee employee, TEmployee boss) {
     TEmployee *temp = (TEmployee *) realloc(employee->bosses, (employee->bossesSize + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available");
-        // free(employee->bosses);
+        logError(logger, "No more memory available1");
+        free(employee->bosses);
         return;
     }
-    if(employee==NULL)
-    {
-        logError(logger, "No se puede agregar un jefe a un empleado nulo");
-        return;
-    }
-    if(boss==NULL){
+    if(boss == NULL){
         logError(logger, "No se puede agregar un jefe nulo");
         return;
     }
@@ -105,18 +99,13 @@ static void addBoss(TEmployee employee, TEmployee boss) {
 static void addChild(TEmployee employee, TEmployee child) {
     TEmployee *temp = (TEmployee *) realloc(employee->children, (employee->childrenSize + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available");
-        // free(employee->children);
-        return;
+        logError(logger, "No more memory available3");
+        free(employee->children);
+        exit(-1);
     }
-    if(employee==NULL)
-    {
-        logError(logger, "No se puede agregar un hijo a un empleado nulo");
-        return;
-    }
-    if(child==NULL){
+    if(child == NULL){
         logError(logger, "No se puede agregar un hijo nulo");
-        return;
+        exit(1);
     }
     employee->children = temp;
     employee->children[employee->childrenCount] = child;
@@ -126,16 +115,19 @@ static void addChild(TEmployee employee, TEmployee child) {
 
 static void generateRemoveExpression(RemoveExpression *removeExpression) {
     TEmployee employee = getEmployeeFromState(removeExpression->idToRemove);
-    if (employee == NULL)
+    if (employee == NULL) {
         logError(logger, "No se encontro el empleado con id %s", removeExpression->idToRemove);
-    else
+        exit(1);
+    }
+    else {
         removeEmployee(employee);
+    }
 }
 
 static void removeEmployee(TEmployee employee) {
     if (employee == NULL) {
         logError(logger, "No se puede remover un empleado que no existe");
-        return;
+        exit(1);
     }
     removeBosses(employee);
     removeChildren(employee);
@@ -144,19 +136,18 @@ static void removeEmployee(TEmployee employee) {
 static void removeBosses(TEmployee employee) {
     if(employee==NULL){
         logError(logger, "No se puede remover los jefes de un empleado nulo");
-        return;
+        exit(1);
     }
     for (size_t i = 0; i < employee->bossesSize; i++) {
         TEmployee boss = employee->bosses[i];
         if (boss != NULL) {
             for (size_t j = 0; j < boss->childrenSize; j++) {
-                if(boss->children[j]!=NULL){
+                if(boss->children[j] != NULL){
                     if (boss->children[j] == employee) {
                         boss->children[j] = NULL;
                         boss->childrenCount--;
                     }
                 }
-                
             }
             employee->bosses[i] = NULL;
             employee->bossesCount--;
@@ -165,21 +156,20 @@ static void removeBosses(TEmployee employee) {
 }
 
 static void removeChildren(TEmployee employee) {
-    if(employee==NULL){
+    if(employee == NULL){
         logError(logger, "No se puede remover los hijos de un empleado nulo");
-        return;
+        exit(1);
     }
     for (size_t i = 0; i < employee->childrenSize; i++) {
         TEmployee child = employee->children[i];
         if (child != NULL) {
             for (size_t j = 0; j < child->bossesSize; j++) {
-               if(child->bosses[j]!=NULL){ 
+               if(child->bosses[j] != NULL){
                     if (child->bosses[j] == employee) {
                         child->bosses[j] = NULL;
                         child->bossesCount--;
                         if (child->bossesCount == 0)
                             removeChildren(child);
-                        //removeEmployee(child);
                     }
                 }
             }
@@ -196,19 +186,11 @@ static void replaceEmployee(TEmployee old, TEmployee new) {
     }
     else{
         logError(logger, "No se puede reemplazar un empleado nulo");
-        return;
+        exit(1);
     }
 }
 
 static void replaceBosses(TEmployee old, TEmployee new) {
-    if(old==NULL){
-        logError(logger, "No se puede reemplazar los jefes de un empleado nulo");
-        return;
-    }
-    if(new==NULL){
-        logError(logger, "No se puede reemplazar los jefes de un empleado por un empleado nulo");
-        return;
-    }
     for (size_t i = 0; i < old->bossesSize; i++) {
         TEmployee boss = old->bosses[i];
         if (boss != NULL) {
@@ -224,14 +206,6 @@ static void replaceBosses(TEmployee old, TEmployee new) {
 }
 
 static void replaceChildren(TEmployee old, TEmployee new) {
-    if(old==NULL){
-        logError(logger, "No se puede reemplazar los hijos de un empleado nulo");
-        return;
-    }
-    if(new==NULL){
-        logError(logger, "No se puede reemplazar los hijos de un empleado por un empleado nulo");
-        return;
-    }
     for (size_t i = 0; i < old->childrenSize; i++) {
         TEmployee child = old->children[i];
         if (child != NULL) {
@@ -247,7 +221,7 @@ static void replaceChildren(TEmployee old, TEmployee new) {
 }
 
 static TEmployee getRoot(TEmployee employee) {
-    if(employee==NULL){
+    if(employee == NULL){
         logError(logger, "No se puede obtener la raiz de un empleado nulo");
         return NULL;
     }
@@ -263,7 +237,7 @@ static TEmployee getRoot(TEmployee employee) {
 }
 
 static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmployee *employees, int *size) {
-    if(employee==NULL){
+    if(employee == NULL){
         logError(logger, "No se puede buscar empleados nulos");
         return;
     }
@@ -272,9 +246,9 @@ static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmpl
     if (hasAttributes(employee, attributes)) {
         TEmployee *temp = (TEmployee *) realloc(employees, (*size + 1) * sizeof(TEmployee));
         if (temp == NULL) {
-            logError(logger, "No more memory available");
-            // free(employees);
-            return;
+            logError(logger, "No more memory available4");
+            free(employees);
+            exit(-1);
         }
         employees = temp;
         employees[*size] = employee;
@@ -292,11 +266,11 @@ static TEmployee *searchEmployees(TEmployee root, Attributes *attributes) {
 
     if (root == NULL) {
         logError(logger, "No se puede buscar empleados si no hay un empleado raiz");
-        return NULL;
+        exit(1);
     }
     if(attributes==NULL){
         logError(logger, "No se puede buscar empleados sin atributos");
-        return NULL;
+        exit(1);
     }
 
     int size = 0;
@@ -305,24 +279,12 @@ static TEmployee *searchEmployees(TEmployee root, Attributes *attributes) {
 
 }
 
-static bool hasProperties(TEmployee employee, Properties *properties) {
-    if(employee==NULL){
-        logError(logger, "No se puede buscar propiedades en un empleado nulo");
-        return false;
-    }
-    if(properties==NULL){
-        logError(logger, "No se puede buscar propiedades nulas");
-        return false;
-    }
-    return hasAttributes(employee, properties->attributes);
-}
-
 static bool hasAttributes(TEmployee employee, Attributes *attributes) {
-    if(attributes==NULL){
+    if(attributes == NULL){
         logError(logger, "No se puede buscar empleados sin atributos");
         return false;
     }
-    if(employee==NULL){
+    if(employee == NULL){
         logError(logger, "No se puede buscar atributos en un empleado nulo");
         return false;
     }
@@ -334,10 +296,6 @@ static bool hasAttributes(TEmployee employee, Attributes *attributes) {
 }
 
 static bool hasAttribute(TEmployee employee, Attribute *attribute) {
-    if(employee==NULL){
-        logError(logger, "No se puede buscar atributos en un empleado nulo");
-        return false;
-    }
     if(attribute==NULL){
         logError(logger, "No se puede buscar un atributo nulo");
         return false;
@@ -371,7 +329,7 @@ static bool isPresent(TEmployee employee, TEmployee *employees) {
 }
 
 static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2) {
-    if(employees1==NULL){
+    if(employees1 == NULL){
         logError(logger, "No se puede concatenar empleados nulos");
         return -1;
     }
@@ -382,7 +340,7 @@ static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2,
     for (size_t i = 0; i < size2; i++) {
         if (employees2[i] != NULL && !isPresent(employees2[i], employees1)) {
             if (temp == NULL) {
-                logError(logger, "No more memory available");
+                logError(logger, "No more memory available5");
                 // free(employees1);
                 return -1;
             }
@@ -404,6 +362,66 @@ static TEmployeeList getListFromState(char *id) {
     return NULL;
 }
 
+static void generateJson() {
+    file = fopen("output.json", "w");
+    if (file == NULL) {
+        logError(logger, "No se pudo abrir el archivo de salida");
+        return;
+    }
+
+    fprintf(file, "{\n");
+    fprintf(file, "\t\"nodes\": [\n");
+
+
+    for (int i = 0; i < state->sizeEmployees; i++) {
+        if (state->employees[i] != NULL) {
+
+            if (state->employees[i]->metadataCount > 0)
+                fprintf(file, "\t\t{ \"id\": \"%s\", ", state->employees[i]->employeeId);
+            else
+                fprintf(file, "\t\t{ \"id\": \"%s\" ", state->employees[i]->employeeId);
+
+            for (int j = 0; j < state->employees[i]->metadataCount; j++) {
+                if (state->employees[i]->metadata[j].metadataType == METADATA_STRING) {
+                    fprintf(file, "\"%s\": %s, ", state->employees[i]->metadata[j].tag,
+                            state->employees[i]->metadata[j].stringValue);
+                } else {
+                    fprintf(file, "\"%s\": %d, ", state->employees[i]->metadata[j].tag,
+                            state->employees[i]->metadata[j].numValue);
+                }
+            }
+            // delete the last comma
+            fseek(file, -1, SEEK_CUR);
+
+            // if is the last employee the comma should go
+            if (i == state->sizeEmployees - 1)
+                fprintf(file, " }\n");
+            else
+                fprintf(file, " },\n");
+        }
+    }
+    fprintf(file, "\t],\n");
+    fprintf(file, "\t\"links\": [\n");
+
+    for (int i = 0; i < state->sizeEmployees; i++) {
+        if (state->employees[i] != NULL) {
+            for (int j = 0; j < state->employees[i]->childrenSize; j++) {
+                if (state->employees[i]->children[j] != NULL) {
+                    fprintf(file, "\t\t{ \"source\": \"%s\", \"target\": \"%s\" },\n", state->employees[i]->employeeId,
+                            state->employees[i]->children[j]->employeeId);
+                }
+            }
+        }
+    }
+
+    // delete the last comma
+    fseek(file, -2, SEEK_CUR);
+    fprintf(file, "\n\t]\n");
+    fprintf(file, "}\n");
+
+    fclose(file);
+}
+
 /**
  * Generates the output of the program.
  */
@@ -415,11 +433,18 @@ static void generateProgram(Program *program) {
         return;
     }
 
+    if (program == NULL) {
+        logError(logger, "No se puede generar un programa nulo");
+        return;
+    }
+
     generateExpressions(program->expressions);
+
+    generateJson();
 }
 
 static void generateExpressions(Expressions *expressions) {
-    if(expressions==NULL){
+    if(expressions == NULL){
         logError(logger, "No se puede generar expresiones nulas");
         return;
     }
@@ -432,18 +457,22 @@ static void generateExpressions(Expressions *expressions) {
  * Generates the output of an expression.
  */
 static void generateExpression(Expression *expression) {
-    if(expression==NULL){
+    if(expression == NULL){
         logError(logger, "No se puede generar una expresion nula");
         return;
     }
+
     switch (expression->type) {
         case VARIABLE_EMPLOYEE_EXPRESSION:
+            logInformation(logger, "Generating variable employee expression...");
             generateVariableEmployeeExpression(expression->variableEmployeeExpression);
             break;
         case EMPLOYEE_EXPRESSION:
+            logInformation(logger, "Generating employee expression...");
             generateEmployeeExpression(expression->employeeExpression);
             break;
         case REMOVE_EXPRESSION:
+            logInformation(logger, "Generating remove expression...");
             generateRemoveExpression(expression->removeExpression);
             break;
         case REPLACE_EXPRESSION:
@@ -462,8 +491,7 @@ static void generateExpression(Expression *expression) {
 }
 
 static void generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
-
-    if(variableEmployeeExpression==NULL){
+    if(variableEmployeeExpression == NULL){
         logError(logger, "No se puede generar una expresion de empleado nula");
         return;
     }
@@ -471,47 +499,42 @@ static void generateVariableEmployeeExpression(VariableEmployeeExpression *varia
 }
 
 static void generateProperties(TEmployee employee, Properties *properties) {
-    if(properties==NULL){
-        logError(logger, "No se puede generar propiedades nulas");
-        return;
-    }
-    if(employee==NULL){
+    if(employee == NULL){
         logError(logger, "No se puede agregar propiedades a un empleado nulo");
         return;
     }
-    generateAttributes(employee, properties->attributes);
+    if (properties != NULL) {
+        logInformation(logger, "Generating properties...");
+        generateAttributes(employee, properties->attributes);
+    } else
+        logInformation(logger, "No properties to generate");
 }
 
 static void generateAttributes(TEmployee employee, Attributes *attributes) {
-    if(attributes==NULL){
+    if(attributes == NULL){
         logError(logger, "No se puede generar atributos nulos");
         return;
     }
-    if(employee==NULL){
-        logError(logger, "No se puede agregar atributos a un empleado nulo");
-        return;
-    }
-    for (int i = 0; i < attributes->count; i++) {
+    for (int i = 0; i < attributes->count; i++)
         generateAttribute(employee, attributes->attributes[i]);
-    }
 }
 
 static void generateAttribute(TEmployee employee, Attribute *attribute) {
-    if(employee==NULL){
-        logError(logger, "No se puede agregar un atributo a un empleado nulo");
-        return;
-    }
-    if(attribute==NULL){
+    if(attribute == NULL){
         logError(logger, "No se puede agregar un atributo nulo");
         return;
     }
-     Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
+
+    Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
     if (temp == NULL) {
         logError(logger, "No more memory available");
-        // free(employee->metadata);
-        return;
+        if (employee->metadata != NULL)
+            free(employee->metadata);
+        exit(-1);
     }
     employee->metadata = temp;
+
+    logInformation(logger, "Asignando la metadata al empleado con id %s", employee->employeeId);
 
     employee->metadata[employee->metadataCount].tag = attribute->tag;
     switch (attribute->attributeType) {
@@ -520,6 +543,7 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
             employee->metadata[employee->metadataCount].numValue = attribute->numValue;
             break;
         case ATTRIBUTE_STRING:
+            logInformation(logger, "Adding string attribute: %s", attribute->stringValue);
             employee->metadata[employee->metadataCount].metadataType = METADATA_STRING;
             employee->metadata[employee->metadataCount].stringValue = attribute->stringValue;
             break;
@@ -528,7 +552,7 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
 }
 
 static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
-    if(employeeExpression==NULL){
+    if(employeeExpression == NULL){
         logError(logger, "No se puede generar una expresion de empleado nula");
         return;
     }
@@ -536,19 +560,22 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
     TEmployeeList list;
     TEmployee root;
 
-    if (employee == NULL)
+    if (employee == NULL) {
+        logInformation(logger, "Creando empleado con id %s", employeeExpression->employeeId);
         employee = newEmployee(employeeExpression->employeeId, employeeExpression->properties);
-    else
+        if (employee == NULL) {
+            logError(logger, "No se pudo crear el empleado con id %s", employeeExpression->employeeId);
+            return;
+        }
+    } else {
+        logInformation(logger, "Agregando propiedades al empleado con id %s", employeeExpression->employeeId);
         generateProperties(employee, employeeExpression->properties);
+    }
 
     switch (employeeExpression->list->listType) {
         case LIST_PROPERTIES:
-            root = getRoot(employee);
-            if (root == NULL) {
-                logError(logger, "No se puede buscar empleados si no hay un empleado raiz");
-                return;
-            }
-            TEmployee *employees = searchEmployees(root, employeeExpression->list->attributes);
+            logInformation(logger, "Agregando jefes al empleado con id %s con propiedades", employeeExpression->employeeId);
+            TEmployee *employees = searchEmployeesInState(employeeExpression->list->attributes);
             if (employees == NULL || employees[0] == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
                 return;
@@ -561,19 +588,25 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
             }
             break;
         case LIST_ELEMENTS:
+            logInformation(logger, "Agregando jefes al empleado con id %s con lista de elementos", employeeExpression->employeeId);
             for (int i = 0; i < employeeExpression->list->elements->count; i++) {
                 TEmployee employeeAux = getEmployeeFromState(employeeExpression->list->elements->ids[i]);
                 if (employeeAux == NULL) {
                     logError(logger, "No se encontro el empleado con id %s",
                              employeeExpression->list->elements->ids[i]);
                 } else {
+                    logInformation(logger, "Agregando jefe con id %s al empleado con id %s", employeeAux->employeeId,
+                                   employeeExpression->employeeId);
                     addBoss(employee, employeeAux);
+                    logInformation(logger, "Agregando empleado con id %s como hijo del empleado con id %s",
+                                   employeeExpression->employeeId, employeeAux->employeeId);
                     addChild(employeeAux, employee);
                 }
             }
             break;
 
         case LIST_EMPLOYEE:
+            logInformation(logger, "Agregando jefes al empleado con id %s con variable", employeeExpression->employeeId);
             list = getListFromState(employeeExpression->list->employeeId);
             if (list == NULL) {
                 logError(logger, "No se encontro la lista con id %s", employeeExpression->list->employeeId);
@@ -652,10 +685,11 @@ static void generateAssignExpression(AssignExpression *assignExpression) {
             size = aux->employeesSize;
             break;
     }
+
     TEmployeeList list = NULL;
     switch (assignExpression->employees->employeesType) {
         case LIST:
-            list = newList(assignExpression->employees->employeesId, employees);
+            newList(assignExpression->employees->employeesId, employees);
             break;
         case VARIABLE:
             list = getListFromState(assignExpression->list->employeeId);
@@ -671,7 +705,7 @@ static void generateAssignExpression(AssignExpression *assignExpression) {
 }
 
 static TEmployee *searchEmployeesInState(Attributes *attributes) {
-    if(attributes==NULL){
+    if(attributes == NULL){
         logError(logger, "No se puede buscar empleados sin atributos");
         return NULL;
     }
@@ -681,7 +715,7 @@ static TEmployee *searchEmployeesInState(Attributes *attributes) {
         if (state->employees[i] != NULL && hasAttributes(state->employees[i], attributes)) {
             TEmployee *temp = (TEmployee *) realloc(employees, (i + 1) * sizeof(TEmployee));
             if (temp == NULL) {
-                logError(logger, "No more memory available");
+                logError(logger, "No more memory available7");
                 free(employees);
                 return NULL;
             }
@@ -860,17 +894,18 @@ static void output(const unsigned int indentationLevel, const char *const format
 static TEmployee newEmployee(char *employeeId, Properties *properties) {
     if (employeeId == NULL) {
         logError(logger, "No se puede crear un empleado sin id");
-        exit(1);
-    } else if (getEmployeeFromState(employeeId) != NULL) {
+        return NULL;
+    }
+    if (getEmployeeFromState(employeeId) != NULL) {
         logError(logger, "El empleado ya existe");
-        exit(1);
+        return NULL;
     }
 
     TEmployee *temp = (TEmployee *) realloc(state->employees, (state->sizeEmployees + 1) * sizeof(TEmployee));
     if (temp == NULL) {
-        logError(logger, "No more memory available");
-        // free(state->employees);
-        exit(1);
+        logError(logger, "No more memory available8");
+        free(state->employees);
+        exit(-1);
     }
     state->employees = temp;
 
@@ -879,15 +914,19 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
     TEmployee employee = (TEmployee) malloc(sizeof(struct Employee));
     if (employee == NULL) {
         logError(logger, "No hay mas memoria disponible");
-        exit(2);
+        exit(-1);
     }
     employee->employeeId = employeeId;
     employee->metadata = NULL;
     employee->metadataCount = 0;
     employee->children = NULL;
     employee->childrenCount = 0;
+    employee->childrenSize = 0;
     employee->bosses = NULL;
     employee->bossesCount = 0;
+    employee->bossesSize = 0;
+
+    logInformation(logger, "agregnado properties");
     generateProperties(employee, properties);
 
     state->employees[state->sizeEmployees - 1] = employee;
@@ -898,7 +937,7 @@ static TEmployee newEmployee(char *employeeId, Properties *properties) {
 static TEmployeeList newList(char *id, TEmployee *employees) {
     TEmployeeList *temp = (TEmployeeList *) realloc(state->lists, (state->sizeLists + 1) * sizeof(TEmployeeList));
     if (temp == NULL) {
-        logError(logger, "No more memory available");
+        logError(logger, "No more memory available9");
         free(state->lists);
         exit(2);
     }
@@ -922,8 +961,10 @@ static TEmployeeList newList(char *id, TEmployee *employees) {
 
 static TEmployee getEmployeeFromState(char *employeeId) {
     for (int i = 0; i < state->sizeEmployees; i++) {
-        if (strcmp(state->employees[i]->employeeId, employeeId) == 0) {
-            return state->employees[i];
+        if (state->employees[i] != NULL && state->employees[i]->employeeId != NULL) {
+            if (strcmp(state->employees[i]->employeeId, employeeId) == 0) {
+                return state->employees[i];
+            }
         }
     }
 
@@ -935,8 +976,9 @@ static TEmployee getEmployeeFromState(char *employeeId) {
 void generate(CompilerState *compilerState) {
     logDebugging(logger, "Generating final output...");
     file = fopen("project.json", "w");
-    generatePrologue();
+    // generatePrologue();
+
     generateProgram(compilerState->abstractSyntaxtTree);
-    generateEpilogue();
+    // generateEpilogue();
     logDebugging(logger, "Generation is done.");
 }

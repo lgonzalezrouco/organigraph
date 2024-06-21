@@ -35,12 +35,9 @@ const int main(const int count, const char ** arguments) {
 	if (syntacticAnalysisStatus == ACCEPT) {
 		logDebugging(logger, "Computing expression value...");
 		Program * program = compilerState.abstractSyntaxtTree;
-		
-        /*
 		generate(&compilerState);
         logDebugging(logger, "Releasing AST resources...");
         releaseProgram(program);
-		*/
 	}
 	else {
 		logError(logger, "The syntactic-analysis phase rejects the input program.");

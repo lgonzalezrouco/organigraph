@@ -3,4 +3,6 @@ employee empleado;
 
 employee empleado2;
 
+employee empleado3 under { empleado };
+
 replace empleado with empleado2;

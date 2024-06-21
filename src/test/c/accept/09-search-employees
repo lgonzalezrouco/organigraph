@@ -1,1 +1,6 @@
+employee empleado1 {
+    name: "Tomas Rodriguez",
+    role: "junior developer"
+};
+
 employee empleados1[] = search { name: "Tomas Rodriguez" };

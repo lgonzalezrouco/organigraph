@@ -1,6 +1,6 @@
 
 employee empleado;
 
-employee empleado2 under empleado;
+employee empleado2 under { empleado };
 
 remove empleado;

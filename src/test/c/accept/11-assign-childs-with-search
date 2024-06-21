@@ -3,7 +3,7 @@ employee empleado1 {
     name: "Marcos",
     role: "junior developer"
 };
-employee e {
+employee pedro {
     name: "Martin Gonzalez",
     role: "junior developer"
 };

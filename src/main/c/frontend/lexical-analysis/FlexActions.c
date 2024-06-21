@@ -3,7 +3,7 @@
 /* MODULE INTERNAL STATE */
 
 static Logger* _logger = NULL;
-static boolean _logIgnoredLexemes = true;
+static boolean _logIgnoredLexemes = false;
 
 void initializeFlexActionsModule() {
     _logIgnoredLexemes = getBooleanOrDefault("LOG_IGNORED_LEXEMES", _logIgnoredLexemes);

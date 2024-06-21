@@ -59,7 +59,7 @@
 ","                                         { return CommaLexemeAction(createLexicalAnalyzerContext()); }
 ";"                                         { return SemiColonLexemeAction(createLexicalAnalyzerContext());}
 
-"\""[[:alnum:][:space:][:punct:]]+"\""      { return StringLexemeAction(createLexicalAnalyzerContext()); }
+"\""[[:alnum:][:space:]]+"\""      { return StringLexemeAction(createLexicalAnalyzerContext()); }
 
 [[:digit:]]+						        { return IntegerLexemeAction(createLexicalAnalyzerContext()); }
 

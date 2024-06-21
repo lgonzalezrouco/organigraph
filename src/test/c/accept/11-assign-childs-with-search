@@ -1,2 +1,19 @@
-(search { name: "Marcos" })-> under { pedro, juan, marcos } ;
 
+employee empleado1 {
+    name: "Marcos",
+    role: "junior developer"
+};
+employee e {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee juan {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+employee marcos {
+    name: "Martin Gonzalez",
+    role: "junior developer"
+};
+
+(search { name: "Marcos" }) -> under { pedro, juan, marcos }; 

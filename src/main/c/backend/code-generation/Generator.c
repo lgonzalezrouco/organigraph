@@ -707,6 +707,8 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             break;
         case LIST_ELEMENTS:
             for (int i = 0; i < relationshipExpression->list->elements->count; i++) {
+                printf("%d",relationshipExpression->list->elements->count);
+                printf("\n%s\n",relationshipExpression->list->elements->ids[i]);
                 TEmployee employeeAux = getEmployeeFromState(relationshipExpression->list->elements->ids[i]);
                 size = concatenateEmployees(employees, &employeeAux, size, 1);
             }

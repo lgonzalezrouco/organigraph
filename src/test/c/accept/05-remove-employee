@@ -1,5 +1,5 @@
 
-employee empleado in mercadoLibre;
+employee empleado;
 
 employee empleado2 under empleado;
 

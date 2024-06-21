@@ -15,7 +15,8 @@ employee empleado3 under empleado1 {
 employee empleado4 under empleado1 {
     name: "Martin Gonzalez",
     role: "junior developer",
-    age: 25
+    age: 25,
+    job:"ergrfe"
 };
 employee empleado5 under empleado1 {
     name: "Martin Gonzalez",

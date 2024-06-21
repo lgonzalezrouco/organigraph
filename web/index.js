@@ -66,14 +66,14 @@ function visualizeData(data) {
         .append("defs")
         .append("marker")
         .attr("id", "arrow")
-        .attr("viewBox", "0 -5 10 10")
-        .attr("refX", 15) // Adjusted for better arrow placement
+        .attr("viewBox", "0 -10 20 20")
+        .attr("refX", 25) // Adjusted for better arrow placement
         .attr("refY", 0)
-        .attr("markerWidth", 6)
-        .attr("markerHeight", 6)
+        .attr("markerWidth", 15)
+        .attr("markerHeight", 15)
         .attr("orient", "auto")
         .append("path")
-        .attr("d", "M0,-5L10,0L0,5")
+        .attr("d", "M0,-10L20,0L0,10")
         .attr("fill", "#555");
 
     const simulation = d3
@@ -122,19 +122,27 @@ function visualizeData(data) {
 
     node
         .append("rect")
-        .attr("width", (d) => Math.max(100, (d.id || "").length * 10))
+        .attr("width", (d) => {
+            const numChildren = d.children ? d.children.length : 0;
+            return Math.max(100, (d.id || "").length * 10 + numChildren * 5);
+        })
         .attr("height", (d) => {
             const numProperties = Object.keys(d).filter(
-                (key) => !["x", "y", "vx", "vy"].includes(key)
+                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
             ).length;
-            return 20 + 15 * numProperties; // Adjust height based on the number of properties
+            const numChildren = d.children ? d.children.length : 0;
+            return 20 + 15 * numProperties + numChildren * 5; // Adjust height based on the number of properties and children
         })
-        .attr("x", (d) => -Math.max(100, (d.id || "").length * 10) / 2)
+        .attr("x", (d) => {
+            const numChildren = d.children ? d.children.length : 0;
+            return -Math.max(100, (d.id || "").length * 10 + numChildren * 5) / 2;
+        })
         .attr("y", (d) => {
             const numProperties = Object.keys(d).filter(
-                (key) => !["x", "y", "vx", "vy"].includes(key)
+                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
             ).length;
-            return -10 - (15 * (numProperties - 1)) / 2;
+            const numChildren = d.children ? d.children.length : 0;
+            return -10 - (15 * (numProperties - 1) + numChildren * 5) / 2;
         })
         .attr("rx", 10)
         .attr("ry", 10)
@@ -163,7 +171,7 @@ function visualizeData(data) {
         .selectAll("text.prop")
         .data((d) => {
             const properties = Object.keys(d)
-                .filter((key) => !["x", "y", "vx", "vy", "index"].includes(key))
+                .filter((key) => !["id", "x", "y", "vx", "vy", "index"].includes(key))
                 .map((key) => ({key, value: d[key]}));
             return properties.map((prop, i) => ({...prop, yOffset: i * 15}));
         })
@@ -182,9 +190,9 @@ function visualizeData(data) {
         link.attr(
             "d",
             (d) => `
-        M${d.source.x},${d.source.y}
-        L${d.target.x},${d.target.y}
-      `
+      M${d.source.x},${d.source.y}
+      L${d.target.x},${d.target.y}
+    `
         );
 
         node.attr("transform", (d) => `translate(${d.x},${d.y})`);

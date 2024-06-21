@@ -367,15 +367,24 @@ static void generateJson() {
                 fprintf(file, "\t\t{ \"id\": \"%s\" ", state->employees[i]->employeeId);
 
             for (int j = 0; j < state->employees[i]->metadataCount; j++) {
-                if (state->employees[i]->metadata[j].metadataType == METADATA_STRING) {
-                    fprintf(file, "\"%s\": %s, ", state->employees[i]->metadata[j].tag,
-                            state->employees[i]->metadata[j].stringValue);
+                if (j == state->employees[i]->metadataCount - 1) {
+                    if (state->employees[i]->metadata[j].metadataType == METADATA_STRING) {
+                        fprintf(file, "\"%s\": %s", state->employees[i]->metadata[j].tag,
+                                state->employees[i]->metadata[j].stringValue);
+                    } else {
+                        fprintf(file, "\"%s\": %d", state->employees[i]->metadata[j].tag,
+                                state->employees[i]->metadata[j].numValue);
+                    }
                 } else {
-                    fprintf(file, "\"%s\": %d, ", state->employees[i]->metadata[j].tag,
-                            state->employees[i]->metadata[j].numValue);
+                    if (state->employees[i]->metadata[j].metadataType == METADATA_STRING) {
+                        fprintf(file, "\"%s\": %s, ", state->employees[i]->metadata[j].tag,
+                                state->employees[i]->metadata[j].stringValue);
+                    } else {
+                        fprintf(file, "\"%s\": %d, ", state->employees[i]->metadata[j].tag,
+                                state->employees[i]->metadata[j].numValue);
+                    }
                 }
             }
-            fseek(file, -1, SEEK_CUR);
 
             if (i == state->sizeEmployees - 1)
                 fprintf(file, " }\n");

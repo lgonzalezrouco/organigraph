@@ -1,173 +1,216 @@
 function loadData() {
-  d3.select("#graph-svg").html(""); // Clear previous graph
-  document.getElementById("error-message").style.display = "none"; // Hide previous error message
+    d3.select("#graph-svg").html(""); // Clear previous graph
+    document.getElementById("error-message").style.display = "none"; // Hide previous error message
 
-  let jsonData = null;
-  const jsonInput = document.getElementById("json-input").value.trim();
-  const fileInput = document.getElementById("file-input");
+    let jsonData = null;
+    const jsonInput = document.getElementById("json-input").value.trim();
+    const fileInput = document.getElementById("file-input");
 
-  if (jsonInput !== "") {
-    try {
-      jsonData = JSON.parse(jsonInput);
-      visualizeData(jsonData);
-    } catch (error) {
-      showError("Invalid JSON format!");
-      showNoDataMessage(true);
-    }
-  } else if (fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      try {
-        jsonData = JSON.parse(event.target.result);
-        visualizeData(jsonData);
-      } catch (error) {
-        showError("Invalid JSON file!");
+    if (jsonInput !== "") {
+        try {
+            jsonData = JSON.parse(jsonInput);
+            visualizeData(jsonData);
+        } catch (error) {
+            showError("Invalid JSON format!");
+            showNoDataMessage(true);
+        }
+    } else if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            try {
+                jsonData = JSON.parse(event.target.result);
+                visualizeData(jsonData);
+            } catch (error) {
+                showError("Invalid JSON file!");
+                showNoDataMessage(true);
+            }
+        };
+        reader.readAsText(file);
+    } else {
+        showError("Please paste JSON data or upload a JSON file.");
         showNoDataMessage(true);
-      }
-    };
-    reader.readAsText(file);
-  } else {
-    showError("Please paste JSON data or upload a JSON file.");
-    showNoDataMessage(true);
-  }
+    }
 }
 
 function visualizeData(data) {
-  if (!data || !data.nodes || !data.links) {
-    showNoDataMessage(true);
-    return;
-  }
+    if (!data || !data.nodes || !data.links) {
+        showNoDataMessage(true);
+        return;
+    }
 
-  const graphContainer = d3.select("#graph-svg");
-  const width = graphContainer.node().getBoundingClientRect().width;
-  const height = 800;
+    const graphContainer = d3.select("#graph-svg");
+    const width = graphContainer.node().getBoundingClientRect().width;
+    const height = 800;
 
-  const svg = graphContainer
-    .attr("height", height)
-    .append("g")
-    .attr("transform", "translate(40,40)");
+    graphContainer.html(""); // Clear previous graph
 
-  svg
-    .append("defs")
-    .append("marker")
-    .attr("id", "arrow")
-    .attr("viewBox", "0 -5 10 10")
-    .attr("refX", 8)
-    .attr("refY", 0)
-    .attr("markerWidth", 6)
-    .attr("markerHeight", 6)
-    .attr("orient", "auto")
-    .append("path")
-    .attr("d", "M0,-5L10,0L0,5")
-    .attr("fill", "#555");
+    const svg = graphContainer
+        .attr("width", width)
+        .attr("height", height)
+        .append("g");
 
-  const primaryLinks = data.links.filter((link, i, links) => {
-    const targetLinks = links.filter((l) => l.target === link.target);
-    return targetLinks[0] === link;
-  });
-
-  const root = d3
-    .stratify()
-    .id((d) => d.id)
-    .parentId((d) => {
-      const parentLink = primaryLinks.find((link) => link.target === d.id);
-      return parentLink ? parentLink.source : null;
-    })(data.nodes);
-
-  const treeLayout = d3.tree().size([width - 120, height - 160]);
-  treeLayout(root);
-
-  const link = svg
-    .selectAll(".link")
-    .data(root.links())
-    .enter()
-    .append("path")
-    .attr("class", "link")
-    .attr(
-      "d",
-      d3
-        .linkVertical()
-        .x((d) => d.x)
-        .y((d) => d.y)
-    );
-
-  const extraLinks = data.links.filter((link) => {
-    const parentLinks = data.links.filter((l) => l.target === link.target);
-    return parentLinks.length > 1;
-  });
-
-  svg
-    .selectAll(".extra-link")
-    .data(extraLinks)
-    .enter()
-    .append("path")
-    .attr("class", "link extra-link")
-    .attr("d", (d) => {
-      const sourceNode = root.descendants().find((n) => n.data.id === d.source);
-      const targetNode = root.descendants().find((n) => n.data.id === d.target);
-      if (sourceNode && targetNode) {
-        return d3
-          .linkVertical()
-          .x((n) => n.x)
-          .y((n) => n.y)({
-          source: sourceNode,
-          target: targetNode,
+    const zoom = d3
+        .zoom()
+        .scaleExtent([0.1, 10])
+        .on("zoom", (event) => {
+            containerGroup.attr("transform", event.transform);
         });
-      }
+
+    graphContainer.call(zoom);
+
+    const containerGroup = svg.append("g");
+
+    // Define the arrow marker
+    containerGroup
+        .append("defs")
+        .append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 15) // Adjusted for better arrow placement
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#555");
+
+    const simulation = d3
+        .forceSimulation(data.nodes)
+        .force(
+            "link",
+            d3
+                .forceLink(data.links)
+                .id((d) => d.id)
+                .distance(200)
+        )
+        .force("charge", d3.forceManyBody().strength(-500))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force(
+            "collision",
+            d3
+                .forceCollide()
+                .radius((d) => Math.max(100, (d.name || "").length * 10) / 2)
+        );
+
+    const link = containerGroup
+        .append("g")
+        .attr("class", "links")
+        .selectAll("path")
+        .data(data.links)
+        .enter()
+        .append("path")
+        .attr("class", "link")
+        .attr("marker-end", "url(#arrow)"); // Reference the arrow marker here
+
+    const node = containerGroup
+        .append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(data.nodes)
+        .enter()
+        .append("g")
+        .attr("class", "node")
+        .call(
+            d3
+                .drag()
+                .on("start", dragStarted)
+                .on("drag", dragged)
+                .on("end", dragEnded)
+        );
+
+    node
+        .append("rect")
+        .attr("width", (d) => Math.max(100, (d.id || "").length * 10))
+        .attr("height", (d) => {
+            const numProperties = Object.keys(d).filter(
+                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
+            ).length;
+            return 20 + 15 * numProperties; // Adjust height based on the number of properties
+        })
+        .attr("x", (d) => -Math.max(100, (d.id || "").length * 10) / 2)
+        .attr("y", (d) => {
+            const numProperties = Object.keys(d).filter(
+                (key) => !["id", "x", "y", "vx", "vy"].includes(key)
+            ).length;
+            return -10 - (15 * (numProperties - 1)) / 2;
+        })
+        .attr("rx", 10)
+        .attr("ry", 10)
+        .style("fill", "#369")
+        .style("stroke", "#666")
+        .style("stroke-width", "2px")
+        .style("cursor", "pointer");
+
+    node
+        .append("text")
+        .attr("dy", -15)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("fill", "#fff")
+        .text(""); // Remove the text content assignment
+
+    node
+        .selectAll("text.prop")
+        .data((d) => {
+            const properties = Object.keys(d)
+                .filter((key) => !["id", "x", "y", "vx", "vy", "index"].includes(key))
+                .map((key) => ({key, value: d[key]}));
+            return properties.map((prop, i) => ({...prop, yOffset: i * 15}));
+        })
+        .enter()
+        .append("text")
+        .attr("class", "prop")
+        .attr("dy", (d) => `${d.yOffset}px`)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("fill", "#fff")
+        .text(d => `${d.key.charAt(0).toUpperCase() + d.key.slice(1)}: ${d.value}`);
+
+    simulation.on("tick", () => {
+        link.attr(
+            "d",
+            (d) => `
+        M${d.source.x},${d.source.y}
+        L${d.target.x},${d.target.y}
+      `
+        );
+
+        node.attr("transform", (d) => `translate(${d.x},${d.y})`);
     });
 
-  const node = svg
-    .selectAll(".node")
-    .data(root.descendants())
-    .enter()
-    .append("g")
-    .attr("class", "node")
-    .attr("transform", (d) => `translate(${d.x},${d.y})`);
+    function dragStarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
 
-  node
-    .append("rect")
-    .attr("width", (d) => Math.max(100, d.data.name.length * 10))
-    .attr("height", 40)
-    .attr("x", (d) => -Math.max(100, d.data.name.length * 10) / 2)
-    .attr("y", -20)
-    .attr("rx", 10)
-    .attr("ry", 10)
-    .style("fill", "#369")
-    .style("stroke", "#666")
-    .style("stroke-width", "2px")
-    .style("cursor", "pointer");
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
+    }
 
-  node
-    .append("text")
-    .attr("dy", ".35em")
-    .attr("text-anchor", "middle")
-    .style("font-size", "14px")
-    .style("fill", "#fff")
-    .text((d) => d.data.name);
+    function dragEnded(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
 
-  node
-    .append("text")
-    .attr("dy", "1.5em")
-    .attr("text-anchor", "middle")
-    .style("font-size", "10px")
-    .style("fill", "#fff")
-    .text((d) => (d.data.age !== undefined ? `Age: ${d.data.age}` : ""));
-
-  showNoDataMessage(false);
+    showNoDataMessage(false);
 }
 
 function showNoDataMessage(show) {
-  const messageDiv = document.getElementById("no-data-message");
-  if (show) {
-    messageDiv.style.display = "block";
-  } else {
-    messageDiv.style.display = "none";
-  }
+    const messageDiv = document.getElementById("no-data-message");
+    if (show) {
+        messageDiv.style.display = "block";
+    } else {
+        messageDiv.style.display = "none";
+    }
 }
 
 function showError(message) {
-  const errorMessageDiv = document.getElementById("error-message");
-  errorMessageDiv.innerText = message;
-  errorMessageDiv.style.display = "block";
+    const errorMessageDiv = document.getElementById("error-message");
+    errorMessageDiv.innerText = message;
+    errorMessageDiv.style.display = "block";
 }

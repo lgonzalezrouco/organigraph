@@ -66,14 +66,14 @@ function visualizeData(data) {
         .append("defs")
         .append("marker")
         .attr("id", "arrow")
-        .attr("viewBox", "0 -10 20 20")
-        .attr("refX", 25) // Adjusted for better arrow placement
+        .attr("viewBox", "0 -12.5 25 25")
+        .attr("refX", 31.25) // Adjusted for better arrow placement
         .attr("refY", 0)
-        .attr("markerWidth", 15)
-        .attr("markerHeight", 15)
+        .attr("markerWidth", 18.75)
+        .attr("markerHeight", 18.75)
         .attr("orient", "auto")
         .append("path")
-        .attr("d", "M0,-10L20,0L0,10")
+        .attr("d", "M0,-12.5L25,0L0,12.5")
         .attr("fill", "#555");
 
     const simulation = d3

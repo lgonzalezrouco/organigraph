@@ -87,6 +87,15 @@ static void addBoss(TEmployee employee, TEmployee boss) {
         // free(employee->bosses);
         return;
     }
+    if(employee==NULL)
+    {
+        logError(logger, "No se puede agregar un jefe a un empleado nulo");
+        return;
+    }
+    if(boss==NULL){
+        logError(logger, "No se puede agregar un jefe nulo");
+        return;
+    }
     employee->bosses = temp;
     employee->bosses[employee->bossesCount] = boss;
     employee->bossesCount++;
@@ -98,6 +107,15 @@ static void addChild(TEmployee employee, TEmployee child) {
     if (temp == NULL) {
         logError(logger, "No more memory available");
         // free(employee->children);
+        return;
+    }
+    if(employee==NULL)
+    {
+        logError(logger, "No se puede agregar un hijo a un empleado nulo");
+        return;
+    }
+    if(child==NULL){
+        logError(logger, "No se puede agregar un hijo nulo");
         return;
     }
     employee->children = temp;
@@ -124,14 +142,21 @@ static void removeEmployee(TEmployee employee) {
 }
 
 static void removeBosses(TEmployee employee) {
+    if(employee==NULL){
+        logError(logger, "No se puede remover los jefes de un empleado nulo");
+        return;
+    }
     for (size_t i = 0; i < employee->bossesSize; i++) {
         TEmployee boss = employee->bosses[i];
         if (boss != NULL) {
             for (size_t j = 0; j < boss->childrenSize; j++) {
-                if (boss->children[j] == employee) {
-                    boss->children[j] = NULL;
-                    boss->childrenCount--;
+                if(boss->children[j]!=NULL){
+                    if (boss->children[j] == employee) {
+                        boss->children[j] = NULL;
+                        boss->childrenCount--;
+                    }
                 }
+                
             }
             employee->bosses[i] = NULL;
             employee->bossesCount--;
@@ -140,16 +165,22 @@ static void removeBosses(TEmployee employee) {
 }
 
 static void removeChildren(TEmployee employee) {
+    if(employee==NULL){
+        logError(logger, "No se puede remover los hijos de un empleado nulo");
+        return;
+    }
     for (size_t i = 0; i < employee->childrenSize; i++) {
         TEmployee child = employee->children[i];
         if (child != NULL) {
             for (size_t j = 0; j < child->bossesSize; j++) {
-                if (child->bosses[j] == employee) {
-                    child->bosses[j] = NULL;
-                    child->bossesCount--;
-                    if (child->bossesCount == 0)
-                        removeChildren(child);
-                    //removeEmployee(child);
+               if(child->bosses[j]!=NULL){ 
+                    if (child->bosses[j] == employee) {
+                        child->bosses[j] = NULL;
+                        child->bossesCount--;
+                        if (child->bossesCount == 0)
+                            removeChildren(child);
+                        //removeEmployee(child);
+                    }
                 }
             }
             employee->children[i] = NULL;
@@ -163,9 +194,21 @@ static void replaceEmployee(TEmployee old, TEmployee new) {
         replaceBosses(old, new);
         replaceChildren(old, new);
     }
+    else{
+        logError(logger, "No se puede reemplazar un empleado nulo");
+        return;
+    }
 }
 
 static void replaceBosses(TEmployee old, TEmployee new) {
+    if(old==NULL){
+        logError(logger, "No se puede reemplazar los jefes de un empleado nulo");
+        return;
+    }
+    if(new==NULL){
+        logError(logger, "No se puede reemplazar los jefes de un empleado por un empleado nulo");
+        return;
+    }
     for (size_t i = 0; i < old->bossesSize; i++) {
         TEmployee boss = old->bosses[i];
         if (boss != NULL) {
@@ -181,6 +224,14 @@ static void replaceBosses(TEmployee old, TEmployee new) {
 }
 
 static void replaceChildren(TEmployee old, TEmployee new) {
+    if(old==NULL){
+        logError(logger, "No se puede reemplazar los hijos de un empleado nulo");
+        return;
+    }
+    if(new==NULL){
+        logError(logger, "No se puede reemplazar los hijos de un empleado por un empleado nulo");
+        return;
+    }
     for (size_t i = 0; i < old->childrenSize; i++) {
         TEmployee child = old->children[i];
         if (child != NULL) {
@@ -196,6 +247,10 @@ static void replaceChildren(TEmployee old, TEmployee new) {
 }
 
 static TEmployee getRoot(TEmployee employee) {
+    if(employee==NULL){
+        logError(logger, "No se puede obtener la raiz de un empleado nulo");
+        return NULL;
+    }
     if (employee->bossesCount == 0)
         return employee;
 
@@ -208,9 +263,12 @@ static TEmployee getRoot(TEmployee employee) {
 }
 
 static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmployee *employees, int *size) {
+    if(employee==NULL){
+        logError(logger, "No se puede buscar empleados nulos");
+        return;
+    }
     if (isPresent(employee, employees))
         return;
-
     if (hasAttributes(employee, attributes)) {
         TEmployee *temp = (TEmployee *) realloc(employees, (*size + 1) * sizeof(TEmployee));
         if (temp == NULL) {
@@ -230,13 +288,14 @@ static void searchEmployeesRec(TEmployee employee, Attributes *attributes, TEmpl
 
 static TEmployee *searchEmployees(TEmployee root, Attributes *attributes) {
     TEmployee *employees = (TEmployee *) malloc(sizeof(TEmployee));
-    if (employees == NULL) {
-        logError(logger, "No hay mas memoria disponible");
-        return NULL;
-    }
+   
 
     if (root == NULL) {
         logError(logger, "No se puede buscar empleados si no hay un empleado raiz");
+        return NULL;
+    }
+    if(attributes==NULL){
+        logError(logger, "No se puede buscar empleados sin atributos");
         return NULL;
     }
 
@@ -247,10 +306,26 @@ static TEmployee *searchEmployees(TEmployee root, Attributes *attributes) {
 }
 
 static bool hasProperties(TEmployee employee, Properties *properties) {
+    if(employee==NULL){
+        logError(logger, "No se puede buscar propiedades en un empleado nulo");
+        return false;
+    }
+    if(properties==NULL){
+        logError(logger, "No se puede buscar propiedades nulas");
+        return false;
+    }
     return hasAttributes(employee, properties->attributes);
 }
 
 static bool hasAttributes(TEmployee employee, Attributes *attributes) {
+    if(attributes==NULL){
+        logError(logger, "No se puede buscar empleados sin atributos");
+        return false;
+    }
+    if(employee==NULL){
+        logError(logger, "No se puede buscar atributos en un empleado nulo");
+        return false;
+    }
     for (size_t i = 0; i < attributes->count; i++) {
         if (!hasAttribute(employee, attributes->attributes[i]))
             return false;
@@ -259,6 +334,14 @@ static bool hasAttributes(TEmployee employee, Attributes *attributes) {
 }
 
 static bool hasAttribute(TEmployee employee, Attribute *attribute) {
+    if(employee==NULL){
+        logError(logger, "No se puede buscar atributos en un empleado nulo");
+        return false;
+    }
+    if(attribute==NULL){
+        logError(logger, "No se puede buscar un atributo nulo");
+        return false;
+    }
     for (size_t i = 0; i < employee->metadataCount; i++) {
         if (strcmp(employee->metadata[i].tag, attribute->tag) == 0) {
             switch (employee->metadata[i].metadataType) {
@@ -288,10 +371,16 @@ static bool isPresent(TEmployee employee, TEmployee *employees) {
 }
 
 static size_t concatenateEmployees(TEmployee *employees1, TEmployee *employees2, size_t size1, size_t size2) {
+    if(employees1==NULL){
+        logError(logger, "No se puede concatenar empleados nulos");
+        return -1;
+    }
+    if (employees2 == NULL)
+        return size1;
     int j = 0;
+    TEmployee *temp = (TEmployee *) realloc(employees1, (size1 + size2 + 1) * sizeof(TEmployee));
     for (size_t i = 0; i < size2; i++) {
         if (employees2[i] != NULL && !isPresent(employees2[i], employees1)) {
-            TEmployee *temp = (TEmployee *) realloc(employees1, (size1 + j + 1) * sizeof(TEmployee));
             if (temp == NULL) {
                 logError(logger, "No more memory available");
                 // free(employees1);
@@ -330,6 +419,10 @@ static void generateProgram(Program *program) {
 }
 
 static void generateExpressions(Expressions *expressions) {
+    if(expressions==NULL){
+        logError(logger, "No se puede generar expresiones nulas");
+        return;
+    }
     for (int i = 0; i < expressions->count; i++) {
         generateExpression(expressions->expressions[i]);
     }
@@ -339,6 +432,10 @@ static void generateExpressions(Expressions *expressions) {
  * Generates the output of an expression.
  */
 static void generateExpression(Expression *expression) {
+    if(expression==NULL){
+        logError(logger, "No se puede generar una expresion nula");
+        return;
+    }
     switch (expression->type) {
         case VARIABLE_EMPLOYEE_EXPRESSION:
             generateVariableEmployeeExpression(expression->variableEmployeeExpression);
@@ -365,21 +462,50 @@ static void generateExpression(Expression *expression) {
 }
 
 static void generateVariableEmployeeExpression(VariableEmployeeExpression *variableEmployeeExpression) {
+
+    if(variableEmployeeExpression==NULL){
+        logError(logger, "No se puede generar una expresion de empleado nula");
+        return;
+    }
     newEmployee(variableEmployeeExpression->employeeId, variableEmployeeExpression->properties);
 }
 
 static void generateProperties(TEmployee employee, Properties *properties) {
+    if(properties==NULL){
+        logError(logger, "No se puede generar propiedades nulas");
+        return;
+    }
+    if(employee==NULL){
+        logError(logger, "No se puede agregar propiedades a un empleado nulo");
+        return;
+    }
     generateAttributes(employee, properties->attributes);
 }
 
 static void generateAttributes(TEmployee employee, Attributes *attributes) {
+    if(attributes==NULL){
+        logError(logger, "No se puede generar atributos nulos");
+        return;
+    }
+    if(employee==NULL){
+        logError(logger, "No se puede agregar atributos a un empleado nulo");
+        return;
+    }
     for (int i = 0; i < attributes->count; i++) {
         generateAttribute(employee, attributes->attributes[i]);
     }
 }
 
 static void generateAttribute(TEmployee employee, Attribute *attribute) {
-    Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
+    if(employee==NULL){
+        logError(logger, "No se puede agregar un atributo a un empleado nulo");
+        return;
+    }
+    if(attribute==NULL){
+        logError(logger, "No se puede agregar un atributo nulo");
+        return;
+    }
+     Metadata *temp = (Metadata *) realloc(employee->metadata, (employee->metadataCount + 1) * sizeof(Metadata));
     if (temp == NULL) {
         logError(logger, "No more memory available");
         // free(employee->metadata);
@@ -402,6 +528,10 @@ static void generateAttribute(TEmployee employee, Attribute *attribute) {
 }
 
 static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
+    if(employeeExpression==NULL){
+        logError(logger, "No se puede generar una expresion de empleado nula");
+        return;
+    }
     TEmployee employee = getEmployeeFromState(employeeExpression->employeeId);
     TEmployeeList list;
     TEmployee root;
@@ -460,6 +590,10 @@ static void generateEmployeeExpression(EmployeeExpression *employeeExpression) {
 }
 
 static void generateReplaceExpression(ReplaceExpression *replaceExpression) {
+    if(replaceExpression==NULL){
+        logError(logger, "No se puede generar una expresion de reemplazo nula");
+        return;
+    }
     TEmployee old = getEmployeeFromState(replaceExpression->idToReplace);
     if (old == NULL) {
         logError(logger, "No se encontro el empleado con id %s", replaceExpression->idToReplace);
@@ -485,6 +619,10 @@ static void generateReplaceExpression(ReplaceExpression *replaceExpression) {
 }
 
 static void generateAssignExpression(AssignExpression *assignExpression) {
+    if(assignExpression==NULL){
+        logError(logger, "No se puede generar una expresion de asignacion nula");
+        return;
+    }
     TEmployee *employees = NULL;
     TEmployeeList aux;
     size_t size = 0;
@@ -533,6 +671,10 @@ static void generateAssignExpression(AssignExpression *assignExpression) {
 }
 
 static TEmployee *searchEmployeesInState(Attributes *attributes) {
+    if(attributes==NULL){
+        logError(logger, "No se puede buscar empleados sin atributos");
+        return NULL;
+    }
     TEmployee *employees = NULL;
 
     for (int i = 0; i < state->sizeEmployees; i++) {
@@ -551,6 +693,10 @@ static TEmployee *searchEmployeesInState(Attributes *attributes) {
 }
 
 static void generateRelationshipExpression(RelationshipExpression *relationshipExpression) {
+    if(relationshipExpression==NULL){
+        logError(logger, "No se puede generar una expresion de relacion nula");
+        return;
+    }
     TEmployee *employees = NULL;
     TEmployeeList list = NULL;
     size_t size = 0;

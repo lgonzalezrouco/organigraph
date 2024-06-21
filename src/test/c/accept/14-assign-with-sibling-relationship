@@ -27,4 +27,4 @@ employee empleado36 under {empleado5};
 employee empleado37 under {empleado5};
 employee empleado38 under {empleado5};
 
-{empleado5} -> under {empleado1};
+{ empleado5,empleado2} == under {empleado1};

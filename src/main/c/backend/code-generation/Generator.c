@@ -698,16 +698,17 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
     TEmployee *employees = NULL;
     TEmployeeList list = NULL;
     size_t size = 0;
-
     switch (relationshipExpression->list->listType) {
         case LIST_PROPERTIES:
             employees = searchEmployeesInState(relationshipExpression->list->attributes);
+            size= sizeof(employees) / sizeof(employees[0]);
             if (employees == NULL) {
                 logError(logger, "No se encontraron empleados con las propiedades especificadas");
                 exit(1);
             }
             break;
         case LIST_ELEMENTS:
+            logInformation(logger, "Elements count: %d", relationshipExpression->list->elements->count);
             for (int i = 0; i < relationshipExpression->list->elements->count; i++) {
                 TEmployee employeeAux = getEmployeeFromState(relationshipExpression->list->elements->ids[i]);
                 if (employeeAux == NULL) {
@@ -732,10 +733,13 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
         logError(logger, "No se encontraron empleados");
         exit(1);
     }
+    for(int i = 0; i < size; i++){
+        logInformation(logger, "Employee %s", employees[i]->employeeId);
+    }
 
     TEmployee *employeesInRelationship = NULL;
     size_t size2 = 0;
-    int aux = sizeof(employees) / sizeof(employees[0]);
+    int aux = size;
 
     switch (relationshipExpression->relationship->relationshipType) {
         case RELATIONSHIP_CHILD_AND_SELF:
@@ -755,9 +759,15 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             }
             break;
         case RELATIONSHIP_SIBLING:
+                        logInformation(logger,"aux: %d", aux);
+
             for (int i = 0; i < aux; i++) {
+                                        logInformation(logger,"i: %d", i);
+                logInformation(logger, "Employee %s", employees[i]->employeeId);
                 if (employees[i] != NULL && employees[i]->bosses != NULL) {
                     for (int j = 0; j < employees[i]->bossesSize; j++) {
+                        logInformation(logger,"j: %d", j);
+                        logInformation(logger, "Boss %s", employees[i]->bosses[j]->employeeId);
                         if (employees[i]->bosses[j] != NULL && employees[i]->bosses[j]->children != NULL) {
                             employeesInRelationship = concatenateEmployees(employeesInRelationship, employees[i]->bosses[j]->children,
                                                         size2,
@@ -770,7 +780,7 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
             break;
     }
 
-    if (employeesInRelationship == NULL || employeesInRelationship[0] == NULL) {
+    if (employeesInRelationship == NULL) {
         logError(logger, "No se encontraron empleados en la relacion");
         exit(1);
     }
@@ -817,8 +827,10 @@ static void generateRelationshipExpression(RelationshipExpression *relationshipE
 
     for (int i = 0; i < size2; i++) {
         for (int j = 0; j < aux; j++) {
-            addBoss(employeesInRelationship[i], bosses[j]);
-            addChild(bosses[j], employeesInRelationship[i]);
+            if(bosses[j] != NULL && employeesInRelationship[i] != NULL){
+                addBoss(employeesInRelationship[i], bosses[j]);
+                addChild(bosses[j], employeesInRelationship[i]);
+            }
         }
     }
 }

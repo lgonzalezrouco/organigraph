@@ -2,12 +2,12 @@ employee empleado1 {
     name: "Marcos",
     role: "junior developer"
 };
-employee pedro {
-    name: "Martin Gonzalez",
+employee marc under {empleado1}{
+    name: "Mart",
     role: "junior developer"
 };
 employee juan {
-    name: "Martin Gonzalez",
+    name: "p",
     role: "junior developer"
 };
 employee marcos {
@@ -15,4 +15,4 @@ employee marcos {
     role: "junior developer"
 };
 
-(search { name: "Marcos" }) -> under { pedro, juan, marcos }; 
+(search { name: "Marcos" }) -> under {  juan, marcos }; 
